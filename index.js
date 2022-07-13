@@ -6,7 +6,7 @@ const router = require("./routes.js");
 const app = express();
 
 //port variable
-const port = process.env.PORT || 5000;
+const port = Number(process.env.PORT) || 5000;
 //configuring enviroment variable
 dotenv.config();
 //setting up middlewares
