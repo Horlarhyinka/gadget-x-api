@@ -9,6 +9,4 @@ describe("validators",()=>{
         const result = validators.validateId("testing")
         expect(result).toBe(false)
     })
-    
-    
 })

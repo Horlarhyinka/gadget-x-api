@@ -9,8 +9,8 @@ const commentSchema = new mongoose.Schema({
         required:true
     },
     reactions:{
-        type:String,
-        enum:["like","dislike","haha","angry"]
+        type:Object,
+        default:{}
     },
 })
 
@@ -25,22 +25,18 @@ module.exports.Product = mongoose.model("product",new mongoose.Schema({
     },
     category:{
         type:String,
-        enum:["Phones & Tablets","Laptops & MacBooks","Wrist watches","Power Banks","Others"],
+        enum:["Phones and Tablets","Laptops and MacBooks","Watches","Headphones","Power Banks","Others"],
         required:true
     },
     price:{
         type:Number,
         required:true
     },
-    about:{
-        type:String,
-        minlength:25,
-    },
     preview_image_url:{
         type:String,
         required:true,
     },
-    more_image_url:[String],
+    more_images_url:[String],
     orders:{
         type:Number,
         min:0,
@@ -51,6 +47,11 @@ module.exports.Product = mongoose.model("product",new mongoose.Schema({
         ref:"comment"
     }],
     reactions:{
-        type:[String]
+        type:Object,
+        default:{}
+    },
+    moreInfo:{
+        type:Object,
+        default:{}
     }
 }))

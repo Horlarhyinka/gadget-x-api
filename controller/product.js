@@ -1,20 +1,32 @@
+require("dotenv").config()
 const {Product, Comment} = require("../models/product");
 const joi = require("joi");
 const objectId = require("joi-objectid")
 const { validateProduct, validateId, idIsPresent, isPresent, validateReaction } = require("../util/validators");
 const _ = require("lodash");
 const { User } = require("../models/user");
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 module.exports.getProducts = async(req,res)=>{  
+    const {count,page} = req.query;
+    if(count && page) return res.status(200).json(await Product.find().skip((page - 1) * count).limit(count))
      return res.status(200).json(await Product.find())
 }
+module.exports.createProduct = async(req,res) =>{
+    const validate = validateProduct(req.body)
+    
+    if(validate.error) return res.status(400).json({message:validate.error.details})
 
+    const product = await Product.create(req.body)
+    if(!product) return res.status(500).json({message:"could not create product,try later"})
+    return res.status(200).json(product)
+}
 module.exports.getProduct = async(req,res)=>{
-    // const validate = validateId(req.params)
-    // if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
-const {id } = req.params
-const product = await Product.findById(id)
-return res.status(200).json(_.pick(product,["_id","category","name","about","price"]))
+    const validate = validateId(req.params)
+    if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
+    const {id } = req.params
+    const product = await Product.findById(id)
+    return res.status(200).json(_.pick(product,["_id","category","name","about","price"]))
 }
 
 module.exports.deleteProduct = async(req,res)=>{
@@ -27,7 +39,7 @@ module.exports.deleteProduct = async(req,res)=>{
 module.exports.updateOne = async(req,res) =>{
     const validate = validateId(req.params)
     if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
-    let product = await Product.findByIdAndUpdate(req.params.id,req.body,{new:true})
+    let product = await Product.findById(req.params.id)
     const updates = req.body
     for(update in updates){
         if(updates[update] && updates[update] !== product[update]){
@@ -44,24 +56,26 @@ module.exports.reactToProduct = async(req,res) =>{
     if(!validateReaction(reaction))return res.status(400).json({message:"invalid entry"})
     if(!id) return res.status(400).json({message:"please select a product"})
     if(!reaction) return res.status(400).json({message:"please select a reaction to react"})
-    const updated = await Product.findByIdAndUpdate(id,{
-        $push:{reactions:reaction}
-    },{new:true})
-    if(!updated)return res.status(500).json({message:"something went wrong, try later"})
-    return res.status(200).json(updated)
-}
+    const product = await Product.findById(id)
+    if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
+    if(!product.reactions[reaction]){product.reactions[reaction] = 1}
+    product.reactions[reaction] += 1
+    return res.status(200).json(await product.save())
+} 
 module.exports.comment = async(req,res) =>{
-    const user = req.user
     const {id} = req.params
     const {comment} = req.body
     if(!id) return res.status(400).json({message:"please select a product to comment"})
     if(!comment) return res.status(400).json({message:"please provide comment body"})
-    await Product.findByIdAndUpdate(id,{$push:{comments: comment}},{new:true})
-    return res.status(200).json(await Comment.create({
-        user:_.pick(user,["username","email","picture","_id"]),
-        comment:req.body.comment,
-        productID:id
-    }))
+    const newComment = await Comment.create({
+        user:_.pick(req.user,["username","email","picture","_id"]),
+        comment
+    }) 
+    if(!newComment) return res.status(500).json({message:"internal server error, try later"})
+    const product = await Product.findById(id)
+    if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
+    product.comments.push(newComment)
+    return res.status(200).json(_.pick(await product.save(),["comments"]))
 }
 
 module.exports.reactToComment = async(req,res) =>{
@@ -69,23 +83,27 @@ module.exports.reactToComment = async(req,res) =>{
     const commentID = req.params.id
     if(!commentID) return res.status(400).json({message:"please select a comment"})
     if(!reaction) return res.status(400).json({message:"please select a reaction to react"})
-    const updated = await Comment.findByIdAndUpdate(commentID,{
-        $push:{reactions:reaction}
-    },{new:true})
-    if(!updated)return res.status(404).json({message:"sorry,this comment does not exist anymore"})
-    return res.status(200).json(updated)
+    if(!validateReaction(reaction)) return res.status(400).json({message:"invalid entry"})
+    const comment = await Comment.findById(commentID)
+    if(!comment)return res.status(400).json({message:"sorry, this comment does not exist"})
+    if(!comment.reactions[reaction]){comment.reactions[reaction] = 1}
+    comment.reactions[reaction] += 1
+    return res.status(200).json(await comment.save())
 }
 
 module.exports.getComments = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product"})
-    const comments = Product.findById(id).select("comments")
+    const {comments} = await Product.findById(id).select("comments").populate("comments")
+    return res.status(200).json(comments)
+
 }
 
 module.exports.whitelist = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
     const product = await User.findById(req.user._id)
+    if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
     if(isPresent(id,product.whitelist)) return res.status(400).json({message:"product already in whitelist"})
     product.whitelist.push(id)
     return res.status(200).json(_.pick(await product.save(),["whitelist"]))
@@ -124,13 +142,18 @@ module.exports.clearCart = async(req,res) =>{
     return res.status(200).json(user.cart)
 }
 
-module.exports.purchaseOne = async(req,res) =>{
-    //paystack or stripe (undecided) || paypal payment method
-}
 
-module.exports.purchaseMany = async(req,res) =>{
+module.exports.purchase = async(req,res) =>{
+    const checkout_info = req.body.items.map(item =>{
+        return _.pick(item,["name","price","quantity"])
+    })
     //paystack or stripe (undecided) || paypal payment method
-    //purchase products in cart
+    const sessions = await stripe.checkout.sessions.create({
+    mode:[],
+    line_items:checkout_info,
+    success_url:"/payment/success",
+    cancel_url:"/payment/failed"
+    })
 }
 
 //Product.create({name:"testing",category:"Others",preview_image_url:"testing.jpg",price:120}).then((res)=>{console.log(res)})

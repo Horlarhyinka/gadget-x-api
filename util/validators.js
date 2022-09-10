@@ -17,8 +17,9 @@ module.exports.validateProduct = (input) =>{
         name: joi.string().required().trim(),
         category:joi.string().required(),
         price: joi.number().required(),
-        prev_img_url: joi.string().required(),
-        more_img_url: joi.array().min(1)
+        preview_image_url: joi.string().required(),
+        more_images_url: joi.array().min(1),
+        moreInfo:joi.object()
     }).validate(input)
 }
 
