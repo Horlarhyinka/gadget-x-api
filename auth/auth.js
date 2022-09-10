@@ -1,5 +1,5 @@
 const { Router }  = require("express");
-const { login, register, googleAuth, oathCallback, logout } = require("../controller/user");
+const { login, register, googleAuth, oathCallback, logout, adminRegister, adminlogin } = require("../controller/user");
 
 const { usePassport, usePassportRedirect } = require("./passport");
 const {User} = require("../models/user")
@@ -7,7 +7,8 @@ const _ = require("lodash");
 const { authenticate } = require("../middlewares/auth");
 
 const auth = Router();
-
+auth.post("/admin/register",adminRegister)
+auth.post("/admin/login",adminlogin)
 auth.post("/login",login)
 auth.post("/register",register)
 auth.get("/google",usePassport)
