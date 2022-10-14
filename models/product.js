@@ -12,6 +12,9 @@ const commentSchema = new mongoose.Schema({
         type:Object,
         default:{}
     },
+},
+{
+    timestamps:true
 })
 
 const comment = mongoose.model("comment",commentSchema)
@@ -54,4 +57,8 @@ module.exports.Product = mongoose.model("product",new mongoose.Schema({
         type:Object,
         default:{}
     }
-}))
+},
+{
+    timestamps:true
+}
+))

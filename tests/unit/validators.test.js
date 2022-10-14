@@ -1,4 +1,4 @@
-const validators = require("../util/validators")
+const validators = require("../../util/validators")
 
 describe("validators",()=>{
     it("should return a true",()=>{

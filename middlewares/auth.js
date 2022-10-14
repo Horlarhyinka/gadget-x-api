@@ -13,4 +13,3 @@ module.exports.authenticate = async(req,res,next) =>{
     req.user = await User.findById(isAuth.payload)
     next()
 }
-module.exports.usePassport = passport.authenticate("google",{ scope:["profile","email"] } )

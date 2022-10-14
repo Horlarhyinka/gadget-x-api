@@ -8,40 +8,48 @@ const { User } = require("../models/user");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 module.exports.getProducts = async(req,res)=>{  
-    const {count,page} = req.query;
+    const {count,page, category} = req.query;
+    if(category){
+        try{
+            if(count && page) return res.status(200).json(await Product.find({category}).skip((page - 1) * count).limit(count))
+     return res.status(200).json(await Product.find({category}))
+        }catch{
+            return res.status(400).json({message:"invalid entry"})
+        }
+
+    }
     if(count && page) return res.status(200).json(await Product.find().skip((page - 1) * count).limit(count))
      return res.status(200).json(await Product.find())
 }
 module.exports.createProduct = async(req,res) =>{
     const validate = validateProduct(req.body)
-    
     if(validate.error) return res.status(400).json({message:validate.error.details})
-
     const product = await Product.create(req.body)
     if(!product) return res.status(500).json({message:"could not create product,try later"})
     return res.status(200).json(product)
 }
 module.exports.getProduct = async(req,res)=>{
-    const validate = validateId(req.params)
-    if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
     const {id } = req.params
-    const product = await Product.findById(id)
-    return res.status(200).json(_.pick(product,["_id","category","name","about","price"]))
+    const product = await Product.findById(id).populate("comments")
+    return res.status(200).json(_.pick(product,["_id","category","name","moreInfo","price","preview_image_url","more_images_url","comments","reactions"]))
 }
 
 module.exports.deleteProduct = async(req,res)=>{
     const products = await Product.find().select("_id")
-    
     if(!idIsPresent(req.params.id,products)) return res.status(400).json({message:"sorry,this product does not exist"})
     return res.status(200).json(await Product.findByIdAndRemove(req.params.id))
 }
 
 module.exports.updateOne = async(req,res) =>{
+    console.log(req.body)
     const validate = validateId(req.params)
+    //console.log(validate)
     if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
     let product = await Product.findById(req.params.id)
     const updates = req.body
-    for(update in updates){
+
+    for( update of Object.keys(updates)){
+        console.log(update)
         if(updates[update] && updates[update] !== product[update]){
             product[update] = updates[update]
         }
@@ -67,19 +75,19 @@ module.exports.comment = async(req,res) =>{
     const {comment} = req.body
     if(!id) return res.status(400).json({message:"please select a product to comment"})
     if(!comment) return res.status(400).json({message:"please provide comment body"})
+    const product = await Product.findById(id)
+    if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
     const newComment = await Comment.create({
         user:_.pick(req.user,["username","email","picture","_id"]),
         comment
-    }) 
+    })
     if(!newComment) return res.status(500).json({message:"internal server error, try later"})
-    const product = await Product.findById(id)
-    if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
     product.comments.push(newComment)
     return res.status(200).json(_.pick(await product.save(),["comments"]))
 }
 
 module.exports.reactToComment = async(req,res) =>{
-    const reaction = req.query.reaction
+    const reaction = req.query.reaction || req.body.reaction
     const commentID = req.params.id
     if(!commentID) return res.status(400).json({message:"please select a comment"})
     if(!reaction) return res.status(400).json({message:"please select a reaction to react"})
@@ -154,6 +162,15 @@ module.exports.purchase = async(req,res) =>{
     success_url:"/payment/success",
     cancel_url:"/payment/failed"
     })
+}
+
+module.exports.getRelatedProducts = async(req,res) =>{
+    const {id} = req.params
+    const product = await Product.findById(id)
+    if(!product) return res.status(404).json({message:"product not found"})
+    const products = await Product.find({category:product.category})
+    console.log({products})
+    return res.status(200).json(products.filter(prod=>Math.abs(product.price-prod.price) <= 20 && String(prod._id) !== id))
 }
 
 //Product.create({name:"testing",category:"Others",preview_image_url:"testing.jpg",price:120}).then((res)=>{console.log(res)})

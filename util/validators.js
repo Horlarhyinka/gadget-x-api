@@ -6,7 +6,7 @@ joi.objectId = objectId(joi)
 
 module.exports.validateUser = (input) =>{
    return joi.object({
-        username: joi.string().required().min(3),
+        username: joi.string().min(3),
         email: joi.string().required().pattern(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/),
         password: joi.string().required().min(6)
     }).validate(input)
@@ -25,7 +25,7 @@ module.exports.validateProduct = (input) =>{
 
 
 module.exports.validateId = (input) =>{
-    return mongoose.Types.ObjectId.isValid(input)
+    mongoose.Types.ObjectId.isValid(input)?true:false;
 }
 module.exports.verifyJwt = async(token,res) =>{
     try{
