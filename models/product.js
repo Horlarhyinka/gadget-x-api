@@ -20,7 +20,7 @@ const commentSchema = new mongoose.Schema({
 const comment = mongoose.model("comment",commentSchema)
 module.exports.Comment = comment
 
-module.exports.Product = mongoose.model("product",new mongoose.Schema({
+const productSchema = new mongoose.Schema({
     name:{
         type: String,
         trim: true,
@@ -56,9 +56,28 @@ module.exports.Product = mongoose.model("product",new mongoose.Schema({
     moreInfo:{
         type:Object,
         default:{}
-    }
+    },
+    paymentID:{
+        type:String,
+        required:true
+    },
+    priceID:{
+        type:String,
+        required:true
+    },
 },
 {
     timestamps:true
 }
-))
+)
+
+productSchema.statics.getPaymentDetails = async function(id){
+    const prod = await this.findById(id)
+    if(!prod)throw new Error("could not get payment details")
+    return {
+        price: prod.priceID
+    }
+}
+
+
+module.exports.Product = mongoose.model("product",productSchema)

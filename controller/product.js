@@ -5,6 +5,9 @@ const objectId = require("joi-objectid")
 const { validateProduct, validateId, idIsPresent, isPresent, validateReaction } = require("../util/validators");
 const _ = require("lodash");
 const { User } = require("../models/user");
+const cheerio = require("cheerio");
+const axios = require("axios");
+const Order = require("../models/order");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 module.exports.getProducts = async(req,res)=>{  
@@ -24,9 +27,20 @@ module.exports.getProducts = async(req,res)=>{
 module.exports.createProduct = async(req,res) =>{
     const validate = validateProduct(req.body)
     if(validate.error) return res.status(400).json({message:validate.error.details})
-    const product = await Product.create(req.body)
+    const {name,price} = req.body
+    try{
+    const {id:paymentID} = await stripe.products.create({name})
+    const {id: priceID} = await stripe.prices.create({unit_amount:price,
+    currency:"USD",product:paymentID})
+    const product = await Product.create({...req.body,paymentID,priceID})
     if(!product) return res.status(500).json({message:"could not create product,try later"})
+
+    await product.save()
     return res.status(200).json(product)
+    }catch(err){
+        return res.status(500).json({message:"internal server error"})
+    }
+
 }
 module.exports.getProduct = async(req,res)=>{
     const {id } = req.params
@@ -152,16 +166,48 @@ module.exports.clearCart = async(req,res) =>{
 
 
 module.exports.purchase = async(req,res) =>{
-    const checkout_info = req.body.items.map(item =>{
-        return _.pick(item,["name","price","quantity"])
+    const items = await req.body.items.map(async({id,quantity})=>{
+        const paymentDetails = await Product.getPaymentDetails(id)
+        return{...paymentDetails,quantity}
     })
+    
     //paystack or stripe (undecided) || paypal payment method
-    const sessions = await stripe.checkout.sessions.create({
-    mode:[],
-    line_items:checkout_info,
-    success_url:"/payment/success",
-    cancel_url:"/payment/failed"
+    const vals = await Promise.all(items)
+    console.log({vals})
+    const session = await stripe.checkout.sessions.create({
+    // methods:["card"],
+    mode:"payment",
+    line_items:vals,
+    success_url:"http://localhost:2003/api/v1/products/payment/success",
+    cancel_url:"http://localhost:2003/api/v1/products/payment/failed"
     })
+    if(!session) return res.status(500).json({message:"can't process payments at the moment. Please try later"})
+    console.log(session.url)
+    const newOrder = await Order.create({
+        user:req.user._id,
+        sessionID:session.id,
+        product:req.body.items.map(item=>item.id),
+        quantity:req.body.items.reduce((red,item)=>red+=item.quantity,0),
+    })
+
+    console.log(newOrder)
+    await User.findByIdAndUpdate(req.user._id,{orders:{$push:newOrder}})
+    
+    return res.redirect(session.url)
+}
+
+module.exports.resolvePayment = async(req,res) =>{
+    const user = await User.findById(req.user._id).populate("orders")
+    Promise.all(user.orders.map(async(order)=>{
+        if(order.status === "pending"){
+            const session = await stripe.checkout.sessions.retrieve(order.sessionID)
+            if(session.status === "successful" || "closed" || "processed"){
+                await Order.findByIdAndUpdate(order._id)
+            }
+        }
+    })).then(()=>res.status(200).json({message:"payment successful"}))
+    
+    
 }
 
 module.exports.getRelatedProducts = async(req,res) =>{
@@ -173,6 +219,39 @@ module.exports.getRelatedProducts = async(req,res) =>{
     return res.status(200).json(products.filter(prod=>Math.abs(product.price-prod.price) <= 20 && String(prod._id) !== id))
 }
 
+
+module.exports.getFromJumia = async(req,res) =>{
+    let {key,category} = req.query
+    const result = []
+
+    let jsPath = "#jm > main > div.aim.row.-pbm > div.-pvs.col12 > section > div.-paxs.row._no-g._4cl-3cm-shs"
+    
+    let url = "https://www.jumia.com.ng/catalog/"
+    if(category){
+        category = category.replace(" and ","-")
+        url += `${category}/`
+    }
+    if(key){
+        key = key.replace(/[\s&\-?]/,"")
+        url += `?q=${key}`
+    }
+    
+    try{
+        const datas = await axios.get(url)
+        const $ = cheerio.load(datas.data)
+        $(jsPath).each((i,data)=>{
+            console.log(i)
+            result.push($(data).text().trim())
+        })
+        res.status(200).json(result)
+
+
+    }catch(err){
+        return res.status(500).json({message:"could not get jumia data"})
+    }
+ 
+
+}
 //Product.create({name:"testing",category:"Others",preview_image_url:"testing.jpg",price:120}).then((res)=>{console.log(res)})
 // object id = 630f76d3f75ce1d01ba7cc51
 
