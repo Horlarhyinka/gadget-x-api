@@ -19,7 +19,6 @@ module.exports.getProducts = async(req,res)=>{
         }catch{
             return res.status(400).json({message:"invalid entry"})
         }
-
     }
     if(count && page) return res.status(200).json(await Product.find().skip((page - 1) * count).limit(count))
      return res.status(200).json(await Product.find())
@@ -27,20 +26,7 @@ module.exports.getProducts = async(req,res)=>{
 module.exports.createProduct = async(req,res) =>{
     const validate = validateProduct(req.body)
     if(validate.error) return res.status(400).json({message:validate.error.details})
-    const {name,price} = req.body
-    try{
-    const {id:paymentID} = await stripe.products.create({name})
-    const {id: priceID} = await stripe.prices.create({unit_amount:price,
-    currency:"USD",product:paymentID})
-    const product = await Product.create({...req.body,paymentID,priceID})
-    if(!product) return res.status(500).json({message:"could not create product,try later"})
-
-    await product.save()
-    return res.status(200).json(product)
-    }catch(err){
-        return res.status(500).json({message:"internal server error"})
-    }
-
+    return res.status(200).json(await Product.create(req.body))
 }
 module.exports.getProduct = async(req,res)=>{
     const {id } = req.params
@@ -164,52 +150,6 @@ module.exports.clearCart = async(req,res) =>{
     return res.status(200).json(user.cart)
 }
 
-
-module.exports.purchase = async(req,res) =>{
-    const items = await req.body.items.map(async({id,quantity})=>{
-        const paymentDetails = await Product.getPaymentDetails(id)
-        return{...paymentDetails,quantity}
-    })
-    
-    //paystack or stripe (undecided) || paypal payment method
-    const vals = await Promise.all(items)
-    console.log({vals})
-    const session = await stripe.checkout.sessions.create({
-    // methods:["card"],
-    mode:"payment",
-    line_items:vals,
-    success_url:"http://localhost:2003/api/v1/products/payment/success",
-    cancel_url:"http://localhost:2003/api/v1/products/payment/failed"
-    })
-    if(!session) return res.status(500).json({message:"can't process payments at the moment. Please try later"})
-    console.log(session.url)
-    const newOrder = await Order.create({
-        user:req.user._id,
-        sessionID:session.id,
-        product:req.body.items.map(item=>item.id),
-        quantity:req.body.items.reduce((red,item)=>red+=item.quantity,0),
-    })
-
-    console.log(newOrder)
-    await User.findByIdAndUpdate(req.user._id,{orders:{$push:newOrder}})
-    
-    return res.redirect(session.url)
-}
-
-module.exports.resolvePayment = async(req,res) =>{
-    const user = await User.findById(req.user._id).populate("orders")
-    Promise.all(user.orders.map(async(order)=>{
-        if(order.status === "pending"){
-            const session = await stripe.checkout.sessions.retrieve(order.sessionID)
-            if(session.status === "successful" || "closed" || "processed"){
-                await Order.findByIdAndUpdate(order._id)
-            }
-        }
-    })).then(()=>res.status(200).json({message:"payment successful"}))
-    
-    
-}
-
 module.exports.getRelatedProducts = async(req,res) =>{
     const {id} = req.params
     const product = await Product.findById(id)
@@ -221,16 +161,16 @@ module.exports.getRelatedProducts = async(req,res) =>{
 
 
 module.exports.getFromJumia = async(req,res) =>{
-    let {key,category} = req.query
-    const result = []
+    let {key} = req.query
+    let result = []
+    let sorted = []
+    const symbol = require("currency-symbol").symbol("NGN")
+    console.log(String(symbol))
 
     let jsPath = "#jm > main > div.aim.row.-pbm > div.-pvs.col12 > section > div.-paxs.row._no-g._4cl-3cm-shs"
     
     let url = "https://www.jumia.com.ng/catalog/"
-    if(category){
-        category = category.replace(" and ","-")
-        url += `${category}/`
-    }
+
     if(key){
         key = key.replace(/[\s&\-?]/,"")
         url += `?q=${key}`
@@ -243,8 +183,17 @@ module.exports.getFromJumia = async(req,res) =>{
             console.log(i)
             result.push($(data).text().trim())
         })
-        res.status(200).json(result)
-
+        console.log({result})
+        result = result[0].split("Add To Cart")
+        result.map(info =>{
+            let result = {}
+            info = info.split("₦")
+            result["preview"] = info[0]
+            result["price"] = info[1]
+            result["discount"] = info[2]
+            sorted.push(result)
+        })
+        res.status(200).json(sorted)
 
     }catch(err){
         return res.status(500).json({message:"could not get jumia data"})

@@ -45,6 +45,10 @@ const productSchema = new mongoose.Schema({
         min:0,
         default:0
     },
+    quantity:{
+        type: Number,
+        min:1
+    },
     comments:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"comment"
@@ -56,15 +60,7 @@ const productSchema = new mongoose.Schema({
     moreInfo:{
         type:Object,
         default:{}
-    },
-    paymentID:{
-        type:String,
-        required:true
-    },
-    priceID:{
-        type:String,
-        required:true
-    },
+    }
 },
 {
     timestamps:true

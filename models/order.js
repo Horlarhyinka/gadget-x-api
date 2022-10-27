@@ -5,41 +5,32 @@ const orderSchema = new mongoose.Schema({
     user:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"user",
-        required:true
+        // required:true
     },
-    product:{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:"product",
-        required:true
+    /*
+    handler:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"admin"
     },
-    quantity:{
-        type:Number,
-        min:1,
-        default:1
-    },
-    sessionID:{
-        type:String
-    },
-    status:{
-        type:String,
-        enum:["active","pending","cancelled"],
+    */
+
+    items:{
+        type:Array,
         required:true,
-        default:"pending"
+        minLength:1
     },
-    // handler:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"admin",
-    // }
+    reference:{
+        type:String,
+        required:[true,"please provide a reference"]
+    }
 },{
     timestamps:true,
     virtuals:true
 })
 
-orderSchema.virtual("session").get(async function(){
-    return stripe.checkout.sessions.retrieve(this.sessionID)
+orderSchema.virtual("total").get(async function(){
+    return this.items?.reduce((sum,itm)=>sum += itm,0)
 })
-orderSchema.methods.listLineItems = async function(){
-    return stripe.checkout.sessions.listLineItems(this.sessionID)
-}
+
 
 module.exports = mongoose.model("order",orderSchema)

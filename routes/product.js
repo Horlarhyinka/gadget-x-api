@@ -10,17 +10,15 @@ router.get("/",getProducts)
 router.get("/jumia",getFromJumia)
 router.use(objectID)
 router.get("/:id",getProduct)
-router.use(authenticate)
+router.get("/:id/related",getRelatedProducts)
+
+router.use(authenticate) //authenticated routes below
 
 router.put("/:id",updateOne)
 router.delete("/:id",deleteProduct)
-router.get("/:id/related",getRelatedProducts)
 router.get("/react/:id",reactToProduct)
 router.post("/:id/comment",comment)
 router.get("/comments/:id/react",reactToComment)
 router.get("/comments/:id",getComments)
-router.post("/payment/pay",purchase)
-router.get("/payment/success",resolvePayment)
-router.get("/payment/failed",(req,res)=>res.send("failed"))
 
 module.exports = router;

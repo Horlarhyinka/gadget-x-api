@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const log = require("../logger")
 
 module.exports.connectDB = (uri) =>{
-    uri.replace("<password>",process.env.PRODUCTION_DB_PASSWORD)
+    if(process.env.NODE_ENV = "production"){
+       uri = uri.replace("<password>",process.env.PRODUCTION_DB_PASSWORD)
+    }
     mongoose.connect(uri).then(res =>{
         log("info","connected todb")
     }).catch(err =>{
