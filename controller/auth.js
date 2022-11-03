@@ -1,6 +1,7 @@
 require("dotenv").config()
 const bcrypt = require("bcrypt")
-const { User, Admin } = require("../models/user")
+const { User } = require("../models/user")
+const Admin = require("../models/admin")
 const {validateUser} = require("../util/validators")
 const passport = require("passport")
 const _ = require("lodash")
@@ -57,7 +58,6 @@ module.exports.adminlogin = async(req,res)=>{
     if(!admin)return res.status(404).json({message:"sorry,no account registered with this email "})
     if(!admin._kind || admin._kind?.toLowerCase() !== "admin")return res.status(403).json({message:"you're not cleared as an admin, login as a user"})
     const token = await admin.genToken(admin._id)
-    console.log(token)
     await sendCookie(token,res)
     return res.status(200).json({data:_.pick(admin,["email","_kind","username"])})
 }

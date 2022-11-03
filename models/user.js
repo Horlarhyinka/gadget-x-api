@@ -50,15 +50,15 @@ userSchema.methods.validateInfo = async(req,res) =>{
 }
 
 
-const User = mongoose.model("user",userSchema)
-const Admin = User.discriminator("admin",new mongoose.Schema({
-    username:{
-        type:String,
-        required:true,
-    },
-    isAdmin:{
-        type:Boolean,
-        default:true
-    }
-}))
-module.exports = {User, Admin}
+module.exports.User = mongoose.model("user",userSchema)
+
+// const Admin = User.discriminator("admin",new mongoose.Schema({
+//     username:{
+//         type:String,
+//         required:true,
+//     },
+//     isAdmin:{
+//         type:Boolean,
+//         default:true
+//     }
+// }))

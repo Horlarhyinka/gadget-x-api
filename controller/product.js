@@ -1,14 +1,17 @@
 require("dotenv").config()
 const {Product, Comment} = require("../models/product");
-const joi = require("joi");
-const objectId = require("joi-objectid")
 const { validateProduct, validateId, idIsPresent, isPresent, validateReaction } = require("../util/validators");
 const _ = require("lodash");
 const { User } = require("../models/user");
-const cheerio = require("cheerio");
-const axios = require("axios");
-const Order = require("../models/order");
-const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const scraper = require("../util/scraper")
+const {getOrSetCache} = require("../util/cache")
+
+const t = async()=>{
+    let t1 = Date.now()
+    const test = await getOrSetCache("test",()=>"test")
+    console.log("diff",Date.now()-t1)
+    console.log(test)
+}
 
 module.exports.getProducts = async(req,res)=>{  
     const {count,page, category} = req.query;
@@ -162,11 +165,8 @@ module.exports.getRelatedProducts = async(req,res) =>{
 
 module.exports.getFromJumia = async(req,res) =>{
     let {key} = req.query
-    let result = []
-    let sorted = []
-    const symbol = require("currency-symbol").symbol("NGN")
-    console.log(String(symbol))
-
+    // let sorted = []
+    //const result = []
     let jsPath = "#jm > main > div.aim.row.-pbm > div.-pvs.col12 > section > div.-paxs.row._no-g._4cl-3cm-shs"
     
     let url = "https://www.jumia.com.ng/catalog/"
@@ -175,33 +175,18 @@ module.exports.getFromJumia = async(req,res) =>{
         key = key.replace(/[\s&\-?]/,"")
         url += `?q=${key}`
     }
-    
     try{
-        const datas = await axios.get(url)
-        const $ = cheerio.load(datas.data)
-        $(jsPath).each((i,data)=>{
-            console.log(i)
-            result.push($(data).text().trim())
-        })
-        console.log({result})
-        result = result[0].split("Add To Cart")
-        result.map(info =>{
-            let result = {}
-            info = info.split("₦")
-            result["preview"] = info[0]
-            result["price"] = info[1]
-            result["discount"] = info[2]
-            sorted.push(result)
-        })
-        res.status(200).json(sorted)
-
+        const data = await getOrSetCache(key,scraper.scrape(url,jsPath))
+        if(!data) return res.status(404).json({message:"no related datas were found"})
+        return res.status(200).json(data)
     }catch(err){
+        console.log({err})
         return res.status(500).json({message:"could not get jumia data"})
     }
- 
-
 }
+
 //Product.create({name:"testing",category:"Others",preview_image_url:"testing.jpg",price:120}).then((res)=>{console.log(res)})
+
 // object id = 630f76d3f75ce1d01ba7cc51
 
 

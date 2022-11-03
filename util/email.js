@@ -1,45 +1,33 @@
 require("dotenv").config()
 const nodemailer = require("nodemailer")
+const ejs = require("ejs")
+const fs = require("fs")
+const path = require("path")
 
-let options;
-if(process.env.NODE_ENV === "production"){
+const filePath = path.resolve(__dirname,"../views/containers/reminder.ejs")
 
-}else{
-  options = {
-    host:"smtp.gmail.com",
-    port:465,
-    secure:true,
-    auth:{
-        user:"danijufarouq2003@gmail.com",
-        pass:"farouq123.daniju"
-    }
-} 
-}
-
-module.exports = sendMail = async(reciever) =>{
+exports.sendMail = async(reciever) =>{
 
     const mailOptions = {
-        //from:"md.horlarh2003@gmail.com",
-        from:"danijufarouq2003@gmail.com",
+        from:process.env.MAIL_ADDRESS,
         to:reciever,
         subject:"hello",
         text:"hello",
         html:"<p>hello</p>"
     }
-
-    const testAcc = nodemailer.createTestAccount()
+    try{
     const transporter = nodemailer.createTransport({
         host: 'smtp.mailtrap.io',
         port: 465,
-        secure:true,
+        secure:false,
         auth: {
-            // user: process.env.TEST_MAIL_USER,
-            // pass: process.env.TEST_MAIL_PASSWORD
-            user:(await testAcc).user,
-            pass:testAcc.pass
+            user: process.env.TEST_MAIL_USER,
+            pass: process.env.TEST_MAIL_PASSWORD
         }
-    });
+    })
     const res = await transporter.sendMail(mailOptions)
-    console.log(res)
-
+    return res;
+    }catch(err){
+        throw Error(err)
+    }
 }

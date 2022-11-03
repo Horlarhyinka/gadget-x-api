@@ -1,7 +1,7 @@
 require("dotenv").config()
 const passport = require("passport");
 const Strategy = require("passport-google-oauth20");
-const {Admin} = require("../models/user")
+const Admin = require("../models/admin")
 const _ = require("lodash")
 
 passport.use(new Strategy({

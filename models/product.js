@@ -75,5 +75,9 @@ productSchema.statics.getPaymentDetails = async function(id){
     }
 }
 
+productSchema.methods.isAvailable = function(quantityNeeded){
+    return this.quantity >= quantityNeeded
+}
+
 
 module.exports.Product = mongoose.model("product",productSchema)

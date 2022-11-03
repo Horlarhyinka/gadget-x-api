@@ -1,5 +1,4 @@
 const mongoose = require("mongoose")
-const stripe = require("stripe")
 
 const orderSchema = new mongoose.Schema({
     user:{
