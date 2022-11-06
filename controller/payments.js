@@ -34,9 +34,9 @@ exports.verifyPayment = async(req,res) =>{
     if(!status.data.status) return res.status(500).json({message:"couldn't process payment"});
     const {reference:ref, email, metadata} = status.data.data;
     const {items} = metadata;
-    items.map(async({id,quantity})=>{
+    await Promise.all(items.map(async({id,quantity})=>{
         await Product.updateOne({_id:id},{$inc:{quantity:-parseInt(quantity)}})
-    })
+    }))
     //get handler
     const handler = await Admin.getAvailableHandler()
     //if quantity in stock is less than quantity purchased

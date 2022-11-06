@@ -3,6 +3,8 @@ require("./startup/errors")()
 require("dotenv").config()
 const express = require("express")
 const app = express()
+const http =  require("http")
+let Server
 const PORT = 2003;
 const log = require("./logger")
 const {getCache,setCache, getOrSetCache} = require("./util/cache")
@@ -17,8 +19,8 @@ return res.status(200).json(data)
 })
 require("./startup/routes")(app)
 
-function start(){
-    try{  const server = app.listen(PORT,()=>{
+async function start(){
+    try{  Server = http.createServer(app).listen(PORT,()=>{
         log("info",`connected to port ${PORT}`)
     }) 
        const {connectDB} = require("./config/db")
@@ -30,3 +32,5 @@ function start(){
 }
 
 start()
+
+module.exports = Server

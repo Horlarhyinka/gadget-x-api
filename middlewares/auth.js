@@ -7,7 +7,7 @@ const {verifyJwt} = require("../util/validators")
 
 module.exports.authenticate = async(req,res,next) =>{
     if(!req.headers.cookie) return res.status(401).json({message:"unauthenticated"})
-    const cookie = readCookie(req.headers.cookie,"authenticate")
+    const cookie = readCookie(req.headers.cookie,"authenticate") || req.headers["x-auth-token"]
     const isAuth = await verifyJwt(cookie,res)
     if(!isAuth.payload) return res.status(400).json({message:"unauthenticated"})
     req.user = await User.findById(isAuth.payload)

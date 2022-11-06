@@ -74,10 +74,14 @@ productSchema.statics.getPaymentDetails = async function(id){
         price: prod.priceID
     }
 }
+productSchema.post(/update/ig,async function(){
+    if(this.quantity <= 0){
+        console.log("out of stock, mailing admin")
+    }
+})
 
 productSchema.methods.isAvailable = function(quantityNeeded){
     return this.quantity >= quantityNeeded
 }
-
 
 module.exports.Product = mongoose.model("product",productSchema)

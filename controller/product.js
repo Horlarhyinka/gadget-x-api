@@ -138,6 +138,10 @@ module.exports.addToCart = async(req,res) =>{
     return res.status(200).json(_.pick(cart,["cart"]))
 }
 
+module.exports.getCart = async(req,res)=>{
+    return res.status(200).json(_.pick(await User.find(req.user._id),["cart"]))
+}
+
 module.exports.removeFromCart = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to remove"})
