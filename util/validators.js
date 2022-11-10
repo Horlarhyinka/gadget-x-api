@@ -13,6 +13,8 @@ module.exports.validateUser = (input) =>{
 }
 
 module.exports.validateProduct = (input) =>{
+    const categories = ["Phones and Tablets","Laptops and MacBooks","Watches","Headphones","Power Banks","Others"]
+    if(!categories.includes(input.category)) return {error:{details:`category can only be ${categories}`}};
     return joi.object({
         name: joi.string().required().trim(),
         category:joi.string().required(),
@@ -26,8 +28,9 @@ module.exports.validateProduct = (input) =>{
 
 
 module.exports.validateId = (input) =>{
-    mongoose.Types.ObjectId.isValid(input)?true:false;
+    return mongoose.Types.ObjectId.isValid(input)
 }
+
 module.exports.verifyJwt = async(token,res) =>{
     try{
         const verified = await jwt.verify(token,process.env.SECRET)

@@ -44,9 +44,8 @@ module.exports.deleteProduct = async(req,res)=>{
 }
 
 module.exports.updateOne = async(req,res) =>{
-    console.log(req.body)
     const validate = validateId(req.params)
-    //console.log(validate)
+    console.log({validate})
     if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
     let product = await Product.findById(req.params.id)
     const updates = req.body
