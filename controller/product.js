@@ -179,7 +179,7 @@ module.exports.getFromJumia = async(req,res) =>{
         url += `?q=${key}`
     }
     try{
-        const data = await getOrSetCache(key,scraper.scrape(url,jsPath))
+        const data = await getOrSetCache(key,async()=>scraper.scrape(url,jsPath))
         if(!data) return res.status(404).json({message:"no related datas were found"})
         return res.status(200).json(data)
     }catch(err){
