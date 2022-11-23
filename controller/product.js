@@ -161,15 +161,13 @@ module.exports.getRelatedProducts = async(req,res) =>{
     const product = await Product.findById(id)
     if(!product) return res.status(404).json({message:"product not found"})
     const products = await Product.find({category:product.category})
-    console.log({products})
     return res.status(200).json(products.filter(prod=>Math.abs(product.price-prod.price) <= 20 && String(prod._id) !== id))
 }
 
 
 module.exports.getFromJumia = async(req,res) =>{
-    let {key} = req.query
-    // let sorted = []
-    //const result = []
+    let key = req.query.key || "gadgets"
+
     let jsPath = "#jm > main > div.aim.row.-pbm > div.-pvs.col12 > section > div.-paxs.row._no-g._4cl-3cm-shs"
     
     let url = "https://www.jumia.com.ng/catalog/"

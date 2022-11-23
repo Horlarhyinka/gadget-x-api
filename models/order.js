@@ -6,13 +6,10 @@ const orderSchema = new mongoose.Schema({
         ref:"user",
         // required:true
     },
-    /*
     handler:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"admin"
     },
-    */
-
     items:{
         type:Array,
         required:true,

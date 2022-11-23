@@ -3,13 +3,11 @@ const bcrypt = require("bcrypt")
 const { User } = require("../models/user")
 const Admin = require("../models/admin")
 const {validateUser} = require("../util/validators")
-const passport = require("passport")
 const _ = require("lodash")
-const jwt = require("jsonwebtoken")
+const {sendMail} = require("../util/email")
 
 
 module.exports.login = async(req,res) =>{
-    console.log("login route reached")
     const {email,password} = req.body;
     if(!email || !password)return res.status(400).json({message:"please provide email and password"})
     const user = await User.findOne({email});
@@ -42,6 +40,7 @@ module.exports.adminRegister = async(req,res) =>{
     if(exists) return res.status(401).json({message:"sorry, this email is taken"})
     const newUser = await Admin.create({username, email, password})
     const token = await newUser.genToken(newUser._id)
+    await sendMail(newUser.email,"admin-welcome",_.pick(newUser,["firstName","lastName","email"]))
     await sendCookie(token,res)
     return res.status(200).json(_.pick(newUser,["email","username","picture","cart","whitelist","_kind"]))
 }

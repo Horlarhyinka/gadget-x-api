@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include("../components/head.ejs") %>
+<body>
+    <h3 style="display: block;text-align:left;font-size:18px;font-weight:bold;">
+        dear <%= email %></h3> 
+    <p style="display: block;width:100%;text-align:left;font-weight:light;color: rgb(104, 104, 104);">
+        your order for the following <%if(items.length > 1){%> items <%}else{%>items <%}%> has been recieved and will be processed within <%= duration %> working days</p>
+    <% items.map((item)=>{ %>
+        <div style="display: inline-block;width:98%;border:1px solid lightgrey;padding:3px;">
+            <label>name</label>
+            <p style="display: block;text-align:left;font-size:24px;font-weight:bolder;">
+                <%= item.name %></p>
+        </div>
+        <div>
+            <label>price</label>
+            <strong style="display: block;text-align:left;font-size:18px;font-weight:bold;">
+                $<%= item.price %></strong>
+        </div>
+    <%})%>
+        <p><%= handler.firstName %> <%= handler.lastName %> has been assigned as your handler</p>
+    <p>kindly reach out to you handler at <a href="<%= handler.email %>"> <%= handler.email %> </a></p>
+    <footer>thanks for doing business with us</footer>
+</body>
+</html>
