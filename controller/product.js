@@ -138,7 +138,7 @@ module.exports.addToCart = async(req,res) =>{
 }
 
 module.exports.getCart = async(req,res)=>{
-    return res.status(200).json(_.pick(await User.find(req.user._id),["cart"]))
+    return res.status(200).json(_.pick(await User.findById(req.user._id).populate("cart"),["cart"]))
 }
 
 module.exports.removeFromCart = async(req,res) =>{
@@ -168,8 +168,6 @@ module.exports.getRelatedProducts = async(req,res) =>{
 module.exports.getFromJumia = async(req,res) =>{
     let key = req.query.key || "gadgets"
 
-    let jsPath = "#jm > main > div.aim.row.-pbm > div.-pvs.col12 > section > div.-paxs.row._no-g._4cl-3cm-shs"
-    
     let url = "https://www.jumia.com.ng/catalog/"
 
     if(key){
@@ -177,7 +175,7 @@ module.exports.getFromJumia = async(req,res) =>{
         url += `?q=${key}`
     }
     try{
-        const data = await getOrSetCache(key,async()=>scraper.scrape(url,jsPath))
+        const data = await getOrSetCache(key,async()=>scraper.scrape(url))
         if(!data) return res.status(404).json({message:"no related datas were found"})
         return res.status(200).json(data)
     }catch(err){

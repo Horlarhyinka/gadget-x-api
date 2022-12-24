@@ -35,7 +35,6 @@ exports.verifyPayment = async(req,res) =>{
     if(!status.data.status) return res.status(500).json({message:"couldn't process payment"});
     const {reference:ref, metadata} = status.data.data;
     const email  = status.data.data.customer.email
-    // console.log(status.data.data.customer.email)
     const {items} = metadata;
     await Promise.all(items.map(async({id,quantity})=>{
         await Product.updateOne({_id:id},{$inc:{quantity:parseInt(quantity)*-1}})

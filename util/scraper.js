@@ -5,19 +5,15 @@ const axios = require("axios")
 exports.scrape = async(url,jsPath) =>{
     let result = []
     let sorted = []
+    const _path = "#jm > main > div.aim.row.-pbm > div.-pvs.col12 > section > div.-paxs.row._no-g._4cl-3cm-shs"
     const datas = await axios.get(url)
         const $ = cheerio.load(datas.data)
-        $(jsPath).each((i,data)=>{
-            result.push($(data).text().trim())
-        })
-        result = result[0].split("Add To Cart")
-        result.map(info =>{
-            let result = {}
-            info = info.split("₦")
-            result["preview"] = info[0]
-            result["price"] = info[1]
-            result["discount"] = info[2]
-            sorted.push(result)
-        })
-        return sorted;
+    const list = []
+    $(_path).children().each((i,child)=>{
+        const img = $(child).find(".img").attr("data-src")
+        const price = $(child).find(".prc").text()
+        const name = $(child).find(".name").text()
+        list.push({i,name,price,img})
+    })
+    return list
 }

@@ -73,5 +73,6 @@ module.exports.passportRedirect = async(req,res) =>{
 }
 
 function sendCookie(payload,res){
-    return res.cookie("authenticate",payload,{expires:process.env.AGE * 1000})
+    res.set("x-auth-token",payload)
+    return res.cookie("x-auth-token",payload,{expires:process.env.AGE * 1000})
 }
