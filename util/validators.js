@@ -31,15 +31,6 @@ module.exports.validateId = (input) =>{
     return mongoose.Types.ObjectId.isValid(input)
 }
 
-module.exports.verifyJwt = async(token,res) =>{
-    try{
-        const verified = await jwt.verify(token,process.env.SECRET)
-        return verified
-    }catch(err){
-        return res.status(401).json({message:"unauthenticated"})
-    }
-}
-
 module.exports.isPresent = (val,array) =>{
     return array.filter(elem =>{
         return elem == val

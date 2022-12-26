@@ -16,7 +16,7 @@ module.exports.login = async(req,res) =>{
     if(!passwordIsCorrect) return res.status(400).json({message:"incorrect password"})
     const token = await user.genToken(user._id)
     await sendCookie(token,res)
-    return res.status(200).json(_.pick(user,[ "username", "email", "_id","picture","cart","whitelist","_kind"]))
+    return res.status(200).json({data:_.pick(user,[ "username", "email", "_id","picture","cart","whitelist","_kind"]),token})
 }
 
 
@@ -29,7 +29,7 @@ module.exports.register = async(req,res) =>{
     const newUser = await User.create({username, email, password})
     const token = await newUser.genToken(newUser._id)
     await sendCookie(token,res)
-    return res.status(200).json(_.pick(newUser,["email","username","picture","cart","whitelist"]))
+    return res.status(200).json({data:_.pick(newUser,["email","username","picture","cart","whitelist"]),token})
 }
 module.exports.adminRegister = async(req,res) =>{
     const validate = validateUser(req.body)
@@ -42,7 +42,7 @@ module.exports.adminRegister = async(req,res) =>{
     const token = await newUser.genToken(newUser._id)
     await sendMail(newUser.email,"admin-welcome",_.pick(newUser,["firstName","lastName","email"]))
     await sendCookie(token,res)
-    return res.status(200).json(_.pick(newUser,["email","username","picture","cart","whitelist","_kind"]))
+    return res.status(200).json({data:_.pick(newUser,["email","username","picture","cart","whitelist","_kind"]),token})
 }
 
 module.exports.logout = async(req,res) =>{
@@ -58,7 +58,7 @@ module.exports.adminlogin = async(req,res)=>{
     if(!admin._kind || admin._kind?.toLowerCase() !== "admin")return res.status(403).json({message:"you're not cleared as an admin, login as a user"})
     const token = await admin.genToken(admin._id)
     await sendCookie(token,res)
-    return res.status(200).json({data:_.pick(admin,["email","_kind","username"])})
+    return res.status(200).json({data:_.pick(admin,["email","_kind","username"]),token})
 }
 module.exports.passportRedirect = async(req,res) =>{
     const user = req.user
