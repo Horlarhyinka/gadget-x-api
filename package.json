@@ -4,12 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest --watchAll --coverage --verbose",
-    "start": [
-      "set NODE_ENV=development",
-      "nodemon"
-    ]
-  },
+    "test": "jest --watchAll --coverage --verbose"},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Horlarhyinka/gaget-x-api.git"
