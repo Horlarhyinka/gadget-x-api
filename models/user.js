@@ -30,7 +30,14 @@ const userSchema = new mongoose.Schema({
     cart:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"product"
-    }]
+    }],
+    history:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"order"
+    }],
+    tokenExpireTime:{
+        type:Date
+    }
 },{
     timestamps:true,
     discriminatorKey:"_kind"

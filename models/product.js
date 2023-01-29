@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
 const commentSchema = new mongoose.Schema({
-    user:{
-        type:Object,
-        required:true
+    productId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"product"
     },
-    comment:{
+    email:{
+        type:String,
+        
+    },
+    body:{
         type:String,
         required:true
     },
@@ -57,9 +61,8 @@ const productSchema = new mongoose.Schema({
         type:Object,
         default:{}
     },
-    moreInfo:{
-        type:Object,
-        default:{}
+    description:{
+        type:String
     }
 },
 {

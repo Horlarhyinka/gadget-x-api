@@ -9,7 +9,7 @@ const _ = require("lodash")
         method:"POST",
         url:initEndPoint,
         headers:{
-            authorization:"Bearer "+ process.env.PAYSTACK_TEST_SECRET,
+            authorization:"Bearer "+ process.env.PAYSTACK_SECRET,
             "content-type":"Application/json",
             "cache-control":"no-cache"
         },

@@ -1,6 +1,6 @@
 const {Router} = require("express")
 const router = Router()
-const {adminRegister,adminlogin,login,register,logout,passportRedirect} = require("../controller/auth")
+const {adminRegister,adminlogin,login,register,logout,passportRedirect, forgetPassword, forgetPasswordCallback, resetPassword} = require("../controller/auth")
 const {usePassport,usePassportAuth} = require("../auth/passport")
 const {authenticate} = require("../middlewares/auth")
 
@@ -11,6 +11,10 @@ router.post("/register",register)
 router.get("/google",usePassport)
 router.get("/redirect",usePassportAuth,passportRedirect)
 router.get("/logout",authenticate,logout)
+router.post("/forget-password",forgetPassword)
+router.get("/forget-password/:token", forgetPasswordCallback)
+router.patch("/forget-password/:token", resetPassword)
+
 
 
 module.exports = router

@@ -24,4 +24,17 @@ describe("admin model",()=>{
         const result = await Admin.getAvailableHandler()
         expect(result._id).toBeDefined()
     })
+    it("should get admin stats ",async()=>{
+        const result = admin.getStat()
+        expect(result).toBeDefined()
+    })
+    const statCases = ["open","closed","pending"]
+    for(stat of statCases){
+        it(`should increase ${stat} by one`,async()=>{
+            const result = await admin.setStat(stat,1)
+             expect(result[stat]).toBeDefined()
+        })
+    }
+
+
 })

@@ -4,7 +4,11 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest --watchAll --coverage --verbose"
+    "test": "jest --watchAll --coverage --verbose",
+    "start": [
+      "set NODE_ENV=development",
+      "nodemon"
+    ]
   },
   "repository": {
     "type": "git",

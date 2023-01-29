@@ -5,11 +5,13 @@ const express = require("express")
 const app = express()
 const http =  require("http")
 let Server
-const PORT = 2003;
+const PORT = process.env.PORT   
 const log = require("./logger")
 const {getCache,setCache, getOrSetCache} = require("./util/cache")
 const { Product} = require("./models/product")
 require("./startup/middlewares")(app)
+
+console.log(process.env.NODE_ENV)
 
 app.get("/test/:id",async(req,res)=>{
 const getData = () => Product.findById(req.params.id)
@@ -25,7 +27,7 @@ async function start(){
     }) 
        const {connectDB} = require("./config/db")
 
-       connectDB(process.env.NODE_ENV !== "production"?process.env.DB_URL:process.env.PRODUCTION_DB_URI)
+       connectDB(process.env.DB_URL)
     }catch(err){
        log("error","could not start server")
     }

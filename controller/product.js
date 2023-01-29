@@ -1,30 +1,28 @@
 require("dotenv").config()
 const {Product, Comment} = require("../models/product");
-const { validateProduct, validateId, idIsPresent, isPresent, validateReaction } = require("../util/validators");
+const { validateProduct, idIsPresent, isPresent, validateReaction } = require("../util/validators");
 const _ = require("lodash");
 const { User } = require("../models/user");
 const scraper = require("../util/scraper")
 const {getOrSetCache} = require("../util/cache")
 
-const t = async()=>{
-    let t1 = Date.now()
-    const test = await getOrSetCache("test",()=>"test")
-    console.log("diff",Date.now()-t1)
-    console.log(test)
-}
-
 module.exports.getProducts = async(req,res)=>{  
     const {count,page, category} = req.query;
+
+    if(req.user?._kind?.toLowerCase() === "admin"){
+        return res.status(200).json({data: await Product.find()})
+    }
+
     if(category){
         try{
-            if(count && page) return res.status(200).json(await Product.find({category}).skip((page - 1) * count).limit(count))
-     return res.status(200).json(await Product.find({category}))
+            if(count && page) return res.status(200).json(await Product.find({category, quantity:{$gte:1}}).skip((page - 1) * count).limit(count))
+     return res.status(200).json(await Product.find({category, quantity:{$gte:1}}))
         }catch{
             return res.status(400).json({message:"invalid entry"})
         }
     }
-    if(count && page) return res.status(200).json(await Product.find().skip((page - 1) * count).limit(count))
-     return res.status(200).json(await Product.find())
+    if(count && page) return res.status(200).json(await Product.find({quantity:{$gte:1}}).skip((page - 1) * count).limit(count))
+     return res.status(200).json(await Product.find({quantity:{$gte:1}}))
 }
 module.exports.createProduct = async(req,res) =>{
     const validate = validateProduct(req.body)
@@ -34,24 +32,20 @@ module.exports.createProduct = async(req,res) =>{
 module.exports.getProduct = async(req,res)=>{
     const {id } = req.params
     const product = await Product.findById(id).populate("comments")
-    return res.status(200).json(_.pick(product,["_id","category","name","moreInfo","price","preview_image_url","more_images_url","comments","reactions"]))
+    return res.status(200).json(_.pick(product,["_id","category","name","description","quantity","price","preview_image_url","more_images_url","comments","reactions"]))
 }
 
 module.exports.deleteProduct = async(req,res)=>{
-    const products = await Product.find().select("_id")
-    if(!idIsPresent(req.params.id,products)) return res.status(400).json({message:"sorry,this product does not exist"})
-    return res.status(200).json(await Product.findByIdAndRemove(req.params.id))
+    const product = await Product.findByIdAndRemove(req.params.id)
+    if(!product) return res.status(400).json({message:"sorry,this product does not exist"})
+    return res.status(200).json({data:product})
 }
 
 module.exports.updateOne = async(req,res) =>{
-    const validate = validateId(req.params)
-    console.log({validate})
-    if(validate.error) return res.status(400).json({message:"sorry, invalid id"})
     let product = await Product.findById(req.params.id)
     const updates = req.body
 
-    for( update of Object.keys(updates)){
-        console.log(update)
+    for(let update of Object.keys(updates)){
         if(updates[update] && updates[update] !== product[update]){
             product[update] = updates[update]
         }
@@ -68,24 +62,22 @@ module.exports.reactToProduct = async(req,res) =>{
     if(!reaction) return res.status(400).json({message:"please select a reaction to react"})
     const product = await Product.findById(id)
     if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
-    if(!product.reactions[reaction]){product.reactions[reaction] = 1}
-    product.reactions[reaction] += 1
+    product.reactions = {...product.reactions,[reaction]:(product.reactions[reaction]+1) || 1}
     return res.status(200).json(await product.save())
 } 
 module.exports.comment = async(req,res) =>{
     const {id} = req.params
-    const {comment} = req.body
+    const {body} = req.body
     if(!id) return res.status(400).json({message:"please select a product to comment"})
-    if(!comment) return res.status(400).json({message:"please provide comment body"})
-    const product = await Product.findById(id)
+    if(!body) return res.status(400).json({message:"please provide comment body"})
+    const product = await Product.findById(id).populate("comments")
     if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
-    const newComment = await Comment.create({
-        user:_.pick(req.user,["username","email","picture","_id"]),
-        comment
-    })
+    const newComment = await Comment.create({email:req.user.email, body})
     if(!newComment) return res.status(500).json({message:"internal server error, try later"})
     product.comments.push(newComment)
-    return res.status(200).json(_.pick(await product.save(),["comments"]))
+    const {comments} = await product.save()
+    return res.status(200).json({data:comments})
+    
 }
 
 module.exports.reactToComment = async(req,res) =>{
@@ -132,7 +124,7 @@ module.exports.getWhitelists = async (req,res) =>{
 module.exports.addToCart = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
-    const cart = await User.findByIdAndUpdate(req.user._id,{$push:{cart:id}},{new:true})
+    const cart = await User.findByIdAndUpdate(req.user._id,{$addToSet:{cart:id}},{new:true})
     if(!cart)return res.status(500).json({message:"could not whitelist product,try later"})
     return res.status(200).json(_.pick(cart,["cart"]))
 }
@@ -179,16 +171,12 @@ module.exports.getFromJumia = async(req,res) =>{
         if(!data) return res.status(404).json({message:"no related datas were found"})
         return res.status(200).json(data)
     }catch(err){
-        console.log({err})
         return res.status(500).json({message:"could not get jumia data"})
     }
 }
 
-//Product.create({name:"testing",category:"Others",preview_image_url:"testing.jpg",price:120}).then((res)=>{console.log(res)})
-
-// object id = 630f76d3f75ce1d01ba7cc51
-
-
-
-
-//get all,get one,whitelist ,remove from whitelist,updateOne, deleteOne,add to cart,remove from cart, clear cart,
+module.exports.getHistory = async(req,res) =>{
+    const {history} = await User.findById(req.user._id).populate("history")
+    history.sort((a,b)=>a.createdAt-b.createdAt)
+    return res.status(200).json({data:history})
+}

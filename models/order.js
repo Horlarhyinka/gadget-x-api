@@ -6,10 +6,6 @@ const orderSchema = new mongoose.Schema({
         ref:"user",
         // required:true
     },
-    handler:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"admin"
-    },
     items:{
         type:Array,
         required:true,
@@ -18,6 +14,11 @@ const orderSchema = new mongoose.Schema({
     reference:{
         type:String,
         required:[true,"please provide a reference"]
+    },
+    status:{
+        type:String,
+        required:true,
+        enum:["success","Success","successful","Successful","failed","Failed"]
     }
 },{
     timestamps:true,

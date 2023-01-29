@@ -1,14 +1,21 @@
 const objectId = require("joi-objectid")
 const joi = require("joi")
 const jwt = require("jsonwebtoken")
-const { default: mongoose } = require("mongoose")
-joi.objectId = objectId(joi)
+const mongoose= require("mongoose")
 
 module.exports.validateUser = (input) =>{
    return joi.object({
-        username: joi.string().min(3),
         email: joi.string().required().pattern(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/),
         password: joi.string().required().min(6)
+    }).validate(input)
+}
+
+module.exports.validateAdmin = (input) =>{
+    return joi.object({
+        email: joi.string().required().pattern(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/),
+        password: joi.string().required().min(6),
+        firstName:joi.string().required().min(3),
+        lastName:joi.string().required().min(3),
     }).validate(input)
 }
 
@@ -21,7 +28,7 @@ module.exports.validateProduct = (input) =>{
         price: joi.number().required(),
         preview_image_url: joi.string().required(),
         more_images_url: joi.array().min(1),
-        moreInfo:joi.object(),
+        description: joi.string().max(255).min(3),
         quantity: joi.number().min(1)
     }).validate(input)
 }
@@ -31,19 +38,8 @@ module.exports.validateId = (input) =>{
     return mongoose.Types.ObjectId.isValid(input)
 }
 
-module.exports.isPresent = (val,array) =>{
-    return array.filter(elem =>{
-        return elem == val
-    }).length
-}
-
-module.exports.idIsPresent = (id,array) =>{
-    return array.filter(({_id}) =>{
-        return _id == id
-    }).length
-}
-
 module.exports.validateReaction = (reaction)=>{
+    reaction = reaction.toLowerCase()
     const valid = ["like","dislike","haha","angry"]
     return valid.includes(reaction)
 }
