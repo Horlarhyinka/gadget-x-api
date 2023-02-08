@@ -7,17 +7,13 @@ const _ = require("lodash")
 const {sendMail} = require("../util/email")
 const crypto = require("crypto")
 
-console.log(process.env.NODE_ENV)
-
-
 module.exports.login = async(req,res) =>{
     const {email,password} = req.body;
     if(!email || !password)return res.status(400).json({message:"please provide email and password"})
     const user = await User.findOne({email});
     if(!user)return res.status(404).json({message:"sorry, this email is not registered"})
     const passwordIsCorrect = await bcrypt.compare(password,user.password)
-    console.log({passwordIsCorrect,password,userP:user.password})
-    if(!passwordIsCorrect) return res.status(400).json({message:"incorrect password"})
+    if(!passwordIsCorrect) return res.status(401).json({message:"incorrect password"})
     const token = await user.genToken(user._id)
     await sendCookie(token,res)
     return res.status(200).json({data:_.pick(user,[ "username", "email", "_id","picture","cart","whitelist","_kind"]),token})
@@ -59,6 +55,8 @@ module.exports.adminlogin = async(req,res)=>{
     const admin = await Admin.findOne({email})
     if(!admin)return res.status(404).json({message:"sorry,no account registered with this email "})
     if(!admin._kind || admin._kind?.toLowerCase() !== "admin")return res.status(403).json({message:"you're not cleared as an admin, login as a user"})
+    const passwordIsCorrect = await bcrypt.compare(password, admin.password)
+    if(!passwordIsCorrect) return res.status(401).json({message:"incorrect password"})
     const token = await admin.genToken(admin._id)
     await sendCookie(token,res)
     return res.status(200).json({data:_.pick(admin,["email","_kind","username"]),token})
@@ -85,7 +83,6 @@ module.exports.forgetPassword = async(req,res) =>{
     user.passwordResetToken = token;
     user.tokenExpireTime = Date.now() + (1000*60*60*2) //token expires in 2 hrs
     await user.save()
-    console.log(user)
     const resetUrl = `${process.env.APP_UI_URL}/forget-password/${token}`
     await sendMail(email,"forget-password",{resetUrl})
     return res.status(200).json({message:`please check ${email} inbox`})
@@ -109,7 +106,6 @@ module.exports.resetPassword = async(req,res)=>{
     user.passwordResetToken = undefined;
     user.tokenExpireTime = undefined;
     user = await user.save()
-    console.log({user})
     return res.status(200).json({message:"passord reset successful",data:user})
 }
 

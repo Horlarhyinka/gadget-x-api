@@ -11,6 +11,7 @@ Server = require("../../server")
 })
 afterEach(async()=>{
 await Server.close()
+Server = undefined
 })
 
 describe("auth middleware",()=>{
@@ -66,9 +67,10 @@ describe("restrict route to admin",()=>{
             .put(url+product._id)
             .set("x-auth-token",token)
             .send(update)
-        }  
+        } 
     it("should respond with status 403 if user._kind is not equal to admin",async()=>{
-        token = await user.genToken(user._id)
+        admin = await User.create({email:"test@gmail.com",password:"testing"})
+        token = await admin.genToken(admin._id)
         const res = await execute()
         expect(res.status).toEqual(403)
                     })
