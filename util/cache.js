@@ -7,9 +7,9 @@ const REDISPORT = process.env.REDISPORT
 
 
 const {createClient} = require("redis")
-const client = process.env.NODE_ENV !== "production"?
-                createClient({}):
-                createClient({
+ /*process.env.NODE_ENV !== "production"?
+                createClient({}):*/
+    const client = createClient({
                     REDIS_URL:`redis://${{ REDISUSER }}:${{ REDISPASSWORD }}@${{ REDISHOST }}:${{ REDISPORT }}`
                 })
 
