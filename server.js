@@ -18,7 +18,7 @@ async function start(){
         log("info",`connected to port ${PORT}`)
     }) 
     
-      connectDB(process.env.NODE_ENV !== "production"?process.env.DEV_DB_URL:process.env.DB_URL).then(()=>{
+      connectDB(process.env.DB_URL).then(()=>{
         log("info","connected to db")
       }).catch((err)=>{
         console.log(err)
