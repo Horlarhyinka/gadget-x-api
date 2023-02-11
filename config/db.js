@@ -6,5 +6,6 @@ module.exports.connectDB = (uri) =>{
     // if(process.env.NODE_ENV === "production"){
        uri = uri.replace("<password>",process.env.DB_PASSWORD)
     // }
+    console.log({uri})
     return mongoose.connect(uri)
 }

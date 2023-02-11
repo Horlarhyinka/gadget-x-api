@@ -13,7 +13,6 @@ module.exports.validateUser = (input) =>{
 module.exports.validateAdmin = (input) =>{
     return joi.object({
         email: joi.string().required().pattern(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/),
-        password: joi.string().required().min(6),
         firstName:joi.string().required().min(3),
         lastName:joi.string().required().min(3),
     }).validate(input)

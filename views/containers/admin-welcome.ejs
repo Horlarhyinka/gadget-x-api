@@ -4,7 +4,11 @@
 <body>
     <h3>hello <%= firstName %> <%= lastName %></h3>
     <h6>this is to inform you that you have been authorized as a member of gadget-x admin team.</h6>
-    <p> you can now sign in as an admin with your email and password (your last name <%= lastName %> in lowercase)</p>
+    <p> you can now sign in as an admin with the following credentials</p>
+    <ul>
+        <li>email - <%= email %></li>
+        <li>password - <%= password %></li>
+    </ul>
     <strong>we welcome you to the community and hope to get productive together</strong>
 
 </body>

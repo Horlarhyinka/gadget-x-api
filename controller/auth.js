@@ -22,13 +22,13 @@ module.exports.login = async(req,res) =>{
 module.exports.register = async(req,res) =>{
     const validate = validateUser(req.body)
     if(validate.error) return res.status(400).json({message:"invalid credentials"})
-    const {username,email,password} = req.body
+    const {email,password} = req.body
     const exists = await User.findOne({email})
     if(exists) return res.status(401).json({message:"sorry, this email is taken"})
-    const newUser = await User.create({username, email, password})
+    const newUser = await User.create({ email, password})
     const token = await newUser.genToken(newUser._id)
     await sendCookie(token,res)
-    return res.status(200).json({data:_.pick(newUser,["email","username","picture","cart","whitelist"]),token})
+    return res.status(200).json({data:_.pick(newUser,["email","picture","cart","whitelist"]),token})
 }
 
 module.exports.adminRegister = async(req,res) =>{
@@ -36,11 +36,12 @@ module.exports.adminRegister = async(req,res) =>{
     if(validate.error) return res.status(400).json({message:"invalid credentials"})
     const exists = await User.findOne({email:req.body.email,_kind:"admin"})
     if(exists) return res.status(401).json({message:"sorry, this email is taken"})
-    const newUser = await Admin.create({...req.body})
+    const passwd = (req.body.lastName + req.body.firstName)?.toLowerCase()?.slice(0,6)
+    const newUser = await Admin.create({...req.body,password:(passwd)?.toLowerCase()?.slice(0,6)})
     const token = await newUser.genToken(newUser._id)
-    await sendMail(newUser.email,"admin-welcome",_.pick(newUser,["firstName","lastName","email"]))
+    await sendMail(newUser.email,"admin-welcome",{..._.pick(newUser,["firstName","lastName","email"]),password:passwd})
     await sendCookie(token,res)
-    return res.status(200).json({data:_.pick(newUser,["email","username","picture","cart","whitelist","_kind"]),token})
+    return res.status(200).json({data:_.pick(newUser,["email","firstName","lastName","_kind"]),token})
 }
 
 module.exports.logout = async(req,res) =>{
@@ -111,5 +112,11 @@ module.exports.resetPassword = async(req,res)=>{
 
 function sendCookie(payload,res){
     res.set("x-auth-token",payload)
-    return res.cookie("x-auth-token",payload,{expires:process.env.AGE * 1000})
+    return res.cookie("x-auth-token",payload,{expires:new Date(Date.now()+ process.env.AGE * 1000) })
 }
+
+//Admin.create({email:"testing@test.co",firstName:"test",lastName:"test",password:"test"}).then((res)=>console.log(res))
+
+//  User.find({},(err,res)=>{
+//   if(err)console.log(err)
+//   console.log(res)})

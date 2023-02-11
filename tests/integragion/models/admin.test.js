@@ -22,4 +22,7 @@ afterEach(async()=>{
         it("admin should be defined",async()=>{
             expect(mongoose.Types.ObjectId.isValid(admin?._id)).toBeTruthy()
         })
+        it("should have a _kind property of admin",()=>{
+            expect(admin._kind?.toLowerCase()).toEqual("admin")
+        })
     })

@@ -5,12 +5,16 @@ const REDISPASSWORD = process.env.REDISPASSWORD
 const REDISHOST = process.env.REDISHOST
 const REDISPORT = process.env.REDISPORT
 
-
 const {createClient} = require("redis")
  /*process.env.NODE_ENV !== "production"?
                 createClient({}):*/
     const client = createClient({
-                    REDIS_URL:`redis://${{ REDISUSER }}:${{ REDISPASSWORD }}@${{ REDISHOST }}:${{ REDISPORT }}`
+                    url:`redis://${REDISUSER}:${REDISPASSWORD}@${ REDISHOST }:${ REDISPORT }`,
+                    socket:{
+                    host:REDISHOST,
+                    port:REDISPORT  ,
+                    reconnectStrategy: retries => Math.min(retries * 50, 1000)
+                    },  
                 })
 
 client.connect().then(()=>{
