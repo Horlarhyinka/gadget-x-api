@@ -24,38 +24,37 @@ exports.makePayment = async(req,res)=>{
 
     const totalPrice = itemsList.reduce((sum,{price,quantity})=>sum += price*quantity,0)   
     const response = await paystack.initialize({ email, price:parseInt(totalPrice), metadata:{items:itemsList}, token:req.headers["x-auth-token"]})
-    console.log({response})
     if(!response) return res.status(500).json({message:"could not make payment"}) 
-    return res.json({data:response.data.data["authorization_url"]})
+    return res.status(200).json({data:response.data.data["authorization_url"]})
 }
 
 exports.verifyPayment = async(req,res) =>{
     const {reference} = req.query;
     if(!reference)return res.status(StatusCodes.FAILED_DEPENDENCY).json({message:"error verifying your payment"})
-    const status = await paystack.verify(reference)
-    if(!status.data.status) return res.status(500).json({message:"couldn't verify payment"});
-    const {reference:ref, metadata} = status.data.data;
-    const email  = status.data.data.customer.email
+    let {data} = await paystack.verify(reference)
+    if(!data.status)return res.status(StatusCodes.FAILED_DEPENDENCY).json({message:"could not process payment at this time"})
+    data = data.data
+    const {reference:ref, metadata} = data;
+    const email  = data.customer?.email
     const user = await User.findOne({email})
-    if(!user) return res.json({message:"user not found"})
+    if(!user) return res.status(401).json({message:"user not found"})
     const {items} = metadata;
-   
     await Promise.all(items.map(async({_id,quantity})=>{
+        //reduce item in stock by quantity purchased
         await Product.updateOne({_id},{$inc:{quantity:parseInt(quantity)*-1}})
+        //remove item from cart
         await User.findByIdAndUpdate(user._id,{$pull:{cart:_id}})
     }))
-    const newOrder = await order.create({reference:ref ,email ,items:metadata.items ,status:"successful"})
+    //create new order
+    const newOrder = await order.create({reference:ref ,email ,items:metadata.items ,status:data.status})
+    //add order to history
     await User.findOneAndUpdate({email:user.email},{$push:{
         history:newOrder?._id
     }})
-    //send order confirmation mail
+    //send email to user
     await Mailer.sendMail(email,"order-reminder",{
         items:newOrder.items
     })
     if(!newOrder) return res.status(500).json({message:"error getting your order, checkback later"})
-    return res.status(300).redirect(process.env.APP_UI_URL+"/history")
-}
-
-exports.rejectPayment = async(req,res) =>{
-    return res.status(StatusCodes.FAILED_DEPENDENCY).json({message:"error, could not make payment"})
+    return res.status(200).json({data:newOrder})
 }

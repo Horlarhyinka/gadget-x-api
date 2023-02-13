@@ -2,11 +2,12 @@ const { Router } = require("express");
 const router = Router()
 const {authenticate} = require("../middlewares/auth")
 const {whitelist,removeFromWhitelist,getWhitelists} = require("../controller/product")
+const catchAsync = require("../errors/catchAsync")
 
-router.use(authenticate)
-router.use(require("../middlewares/objectID"))
-router.get("/whitelist/:id",whitelist)
-router.delete("/whitelist/:id",removeFromWhitelist)
-router.get("/whitelists",getWhitelists)
+router.use(catchAsync(authenticate))
+router.use(catchAsync(require("../middlewares/objectID")))
+router.get("/whitelist/:id",catchAsync(whitelist))
+router.delete("/whitelist/:id",catchAsync(removeFromWhitelist))
+router.get("/whitelists",catchAsync(getWhitelists))
 
 module.exports = router

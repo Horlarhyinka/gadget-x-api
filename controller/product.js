@@ -110,6 +110,7 @@ module.exports.whitelist = async(req,res) =>{
     product.whitelist.push(id)
     return res.status(200).json(_.pick(await product.save(),["whitelist"]))
 }
+
 module.exports.removeFromWhitelist = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to remove"})
@@ -117,6 +118,7 @@ module.exports.removeFromWhitelist = async(req,res) =>{
     if(!updated) return res.status(500).json({message:"failed to remove, try again later"})
     return res.status(200).json(_.pick(updated,["whitelist"]))
 }
+
 module.exports.getWhitelists = async (req,res) =>{
     return res.status(200).json(await User.findOne(req.user).populate("product").select("whitelist"))
 }

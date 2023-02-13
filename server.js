@@ -21,7 +21,6 @@ async function start(){
       connectDB(process.env.DB_URL).then(()=>{
         log("info","connected to db")
       }).catch((err)=>{
-        console.log(err)
         log("error","could not connect to db"+err)})
     }catch(err){
        log("error","could not start server")

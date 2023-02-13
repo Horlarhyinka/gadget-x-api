@@ -1,3 +1,0 @@
-exports.authError = (message) =>{
-
-}

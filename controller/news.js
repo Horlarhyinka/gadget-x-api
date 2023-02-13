@@ -1,5 +1,4 @@
 const Newsletter = require("../models/news");
-const {catchAsync} = require("../util/error");
 
 module.exports.subscribe = async(req,res)=>{
     const {email} = req.body

@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest --watchAll --coverage --verbose"},
+    "test": "jest"},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Horlarhyinka/gaget-x-api.git"
