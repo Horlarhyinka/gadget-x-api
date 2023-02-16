@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest"},
+    "test": "jest"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Horlarhyinka/gaget-x-api.git"
@@ -16,6 +17,7 @@
   },
   "homepage": "https://github.com/Horlarhyinka/gaget-x-api#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "axios": "^1.1.2",
     "bcrypt": "^5.0.1",
     "cheerio": "^1.0.0-rc.12",

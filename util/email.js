@@ -16,9 +16,10 @@ file = await ejs.renderFile(path.resolve(__dirname,`../views/containers/${type}.
     const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST,
         port: 465,
-        secure:false,
+        secure:true,
+        service:"gmail",
         auth: {
-            user: process.env.MAIL_USER,
+            user: process.env.MAIL_ADDRESS,
             pass: process.env.MAIL_PASSWORD
         }
     })
@@ -30,8 +31,7 @@ file = await ejs.renderFile(path.resolve(__dirname,`../views/containers/${type}.
         }
     })
 
-    const res = await transporter.sendMail(mailOptions)
-    return res;
+    return transporter.sendMail(mailOptions)
     }catch(err){
         throw Error(err)
     }
