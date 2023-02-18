@@ -6,7 +6,6 @@ const REDISHOST = process.env.REDISHOST
 const REDISPORT = process.env.REDISPORT
 
 const {createClient} = require("redis")
-console.log(process.env.NODE_ENV)
 const options = process.env.NODE_ENV !== "production"?{}:{
     url:`redis://${REDISUSER}:${REDISPASSWORD}@${ REDISHOST }:${ REDISPORT }`,
     socket:{

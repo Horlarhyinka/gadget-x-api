@@ -120,3 +120,15 @@ function sendCookie(payload,res){
 //  User.find({},(err,res)=>{
 //   if(err)console.log(err)
 //   console.log({res})})
+
+
+//   Admin.find({},(err,data)=>{
+//   if(err)throw Error(err)
+//   Promise.all(data.map(async({_id})=>await Admin.findByIdAndDelete(_id)),(err,res)=>{
+//     if(err)throw Error(err)
+//     console.log("delete complete"+res)
+// }
+//   ).then(()=>{console.log("completed")})
+//   }
+//   )
+
