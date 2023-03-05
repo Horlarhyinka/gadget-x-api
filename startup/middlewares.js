@@ -8,7 +8,7 @@ module.exports = (app) =>{
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(require("cookie-parser")())
-app.use(require("cors")())
+app.use(require("cors")({origin:process.env.APP_UI_URL}))
 app.use(session({
     secret:process.env.SECRET,
     resave:false,

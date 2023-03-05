@@ -65,14 +65,16 @@ module.exports.adminlogin = async(req,res)=>{
 
 module.exports.passportRedirect = async(req,res) =>{
     const user = req.user
+    console.log("redirect reached >>> ", user)
     if(!user) return res.status(500).json({message:"server error"})
-    const exists = await User.findOne({...user})
-    if(!exists){
-        const newUser = await User.create(user)
-        if(!newUser)return res.status(500).json({message:"error:internal server error"})
-        return res.status(200).json(_.pick(newUser,["email","username","picture","_kind"]))
+    let result = await User.findOne({...user})
+    if(!result){
+        result = await User.create(user)
+        if(!result)return res.status(500).json({message:"error:internal server error"})
     }
-    return res.status(200).json(exists,["email","username","picture","_kind"])
+    const token = result.genToken(result._id)
+    await sendCookie(token, res)
+    return res.status(200).json({data:_.pick(["email","_kind","username"]),token})
 }
 
 module.exports.forgetPassword = async(req,res) =>{
