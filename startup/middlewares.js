@@ -9,7 +9,11 @@ module.exports = (app) =>{
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(require("cookie-parser")())
-app.use(cors({origin:"http://localhost:8080"}))
+app.use(cors({
+    origin:["http://localhost:8080", process.env.APP_API_URL, "https://views-danijufarouq2003-gmailcom.vercel.app"],
+    credentials: true,
+    optionSuccessStatus:200
+    }))
 app.use(session({
     secret:process.env.SECRET,
     resave:false,
