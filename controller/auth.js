@@ -70,7 +70,7 @@ module.exports.passportRedirect = async(req,res) =>{
     const token = await result.genToken(result._id)
     await sendCookie(token + " ;email=" + user.email, res)
     user.password = null
-    return res.status(300).redirect("http://localhost:8080/auth/redirect")
+    return res.status(300).redirect(process.env.APP_UI_URL + "auth/redirect")
 }
 
 module.exports.forgetPassword = async(req,res) =>{
