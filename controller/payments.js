@@ -17,7 +17,6 @@ exports.makePayment = async(req,res)=>{
         }
         const product = await Product.findById(id)
         if(!product)return res.status(404).json({message:"sorry, product not found"})
-        console.log(product.quantity, quantity)
         if(product.quantity < quantity)return res.status(400).json({message:`the selected quantity of ${product.name} is above the available quantity`})
         ids.push(id)
         return {..._.pick(product,["name","category","price","_id"]),quantity}
