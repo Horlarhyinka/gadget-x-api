@@ -10,7 +10,7 @@ module.exports.getProducts = async(req,res)=>{
     const {count,page, category} = req.query;
 
     if(req.user?._kind?.toLowerCase() === "admin"){
-        return res.status(200).json({data: await Product.find()})
+        return res.status(200).json({data: await Product.find({quantity:{$gte:1}})})
     }
 
     if(category){
