@@ -70,21 +70,4 @@ const productSchema = new mongoose.Schema({
 }
 )
 
-productSchema.statics.getPaymentDetails = async function(id){
-    const prod = await this.findById(id)
-    if(!prod)throw new Error("could not get payment details")
-    return {
-        price: prod.priceID
-    }
-}
-productSchema.post(/update/ig,async function(){
-    if(this.quantity <= 0){
-        console.log("out of stock, mailing admin")
-    }
-})
-
-productSchema.methods.isAvailable = function(quantityNeeded){
-    return this.quantity >= quantityNeeded
-}
-
 module.exports.Product = mongoose.model("product",productSchema)

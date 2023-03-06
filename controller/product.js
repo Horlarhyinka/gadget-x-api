@@ -4,7 +4,7 @@ const { validateProduct, idIsPresent, isPresent, validateReaction } = require(".
 const _ = require("lodash");
 const { User } = require("../models/user");
 const scraper = require("../util/scraper")
-const {getOrSetCache} = require("../util/cache")
+const {getOrSetCache} = require("../services/cache")
 
 module.exports.getProducts = async(req,res)=>{  
     const {count,page, category} = req.query;

@@ -4,7 +4,7 @@ const { User } = require("../models/user")
 const Admin = require("../models/admin")
 const {validateUser, validateAdmin} = require("../util/validators")
 const _ = require("lodash")
-const {sendMail} = require("../util/email")
+const {sendMail} = require("../services/email")
 const crypto = require("crypto")
 
 module.exports.login = async(req,res) =>{
@@ -65,16 +65,12 @@ module.exports.adminlogin = async(req,res)=>{
 
 module.exports.passportRedirect = async(req,res) =>{
     const user = req.user
-    console.log("redirect reached >>> ", user)
     if(!user) return res.status(500).json({message:"server error"})
-    let result = await User.findOne({...user})
-    if(!result){
-        result = await User.create(user)
-        if(!result)return res.status(500).json({message:"error:internal server error"})
-    }
-    const token = result.genToken(result._id)
-    await sendCookie(token, res)
-    return res.status(200).json({data:_.pick(["email","_kind","username"]),token})
+    let result = await User.findOne({email:user.email})
+    const token = await result.genToken(result._id)
+    await sendCookie(token + " ;email=" + user.email, res)
+    user.password = null
+    return res.status(300).redirect("http://localhost:8080/auth/redirect")
 }
 
 module.exports.forgetPassword = async(req,res) =>{
@@ -117,12 +113,11 @@ function sendCookie(payload,res){
     return res.cookie("x-auth-token",payload,{expires:new Date(Date.now()+ process.env.AGE * 1000) })
 }
 
-//Admin.create({email:"testing@test.co",firstName:"test",lastName:"test",password:"test"}).then((res)=>console.log(res))
+//Admin.create({email:"testing@test.co",firstName:"test",lastName:"test",password:"testaroo"}).then((res)=>console.log(res))
 
 //  User.find({},(err,res)=>{
 //   if(err)console.log(err)
 //   console.log({res})})
-
 
 //   Admin.find({},(err,data)=>{
 //   if(err)throw Error(err)
@@ -133,4 +128,3 @@ function sendCookie(payload,res){
 //   ).then(()=>{console.log("completed")})
 //   }
 //   )
-

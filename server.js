@@ -17,7 +17,6 @@ async function start(){
     try{  Server = http.createServer(app).listen(PORT,()=>{
         log("info",`connected to port ${PORT}`)
     }) 
-    
       connectDB(process.env.DB_URL).then(()=>{
         log("info","connected to db")
       }).catch((err)=>{

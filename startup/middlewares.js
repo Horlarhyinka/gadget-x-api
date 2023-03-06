@@ -1,9 +1,9 @@
 require("dotenv").config()
 const express = require("express")
-const {passport} = require("../auth/passport")
 const session = require("express-session")
 const MongoStore = require("connect-mongo")
 const cors = require("cors")
+const passport = require("passport")
 
 module.exports = (app) =>{
 app.use(express.json())

@@ -1,9 +1,9 @@
-const paystack = require("../util/paystack")
+const paystack = require("../services/paystack")
 const _ = require("lodash")
 const { Product } = require("../models/product")
 const { StatusCodes } = require("http-status-codes")
 const order = require("../models/order")
-const Mailer = require("../util/email")
+const Mailer = require("../services/email")
 const { User } = require("../models/user")
 
 exports.makePayment = async(req,res)=>{
@@ -21,8 +21,8 @@ exports.makePayment = async(req,res)=>{
         ids.push(id)
         return {..._.pick(product,["name","category","price","_id"]),quantity}
     }))
-
-    const totalPrice = itemsList.reduce((sum,{price,quantity})=>sum += price*quantity,0)   
+    
+    const totalPrice = itemsList.reduce((sum,{price,quantity})=>sum += price*quantity,0)
     const response = await paystack.initialize({ email, price:parseInt(totalPrice), metadata:{items:itemsList}, token:req.headers["x-auth-token"]})
     if(!response) return res.status(500).json({message:"could not make payment"}) 
     return res.status(200).json({data:response.data.data["authorization_url"]})
