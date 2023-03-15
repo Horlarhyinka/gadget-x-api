@@ -14,7 +14,12 @@ const options = process.env.NODE_ENV !== "production"?{}:{
     reconnectStrategy: retries => Math.min(retries * 50, 1000)
     },  
 }
- const client = createClient(options)
+ let client;
+ if(process.env.NODE_ENV === "production"){
+    client = createClient(options)
+ }else{
+    client = createClient()
+ }
     
 client.connect().then(()=>{
     log("info","connected to redis server")
