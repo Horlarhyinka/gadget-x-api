@@ -4,8 +4,6 @@ const Strategy = require("passport-google-oauth20");
 const _ = require("lodash");
 const { User } = require("../models/user");
 
-console.log(`${process.env.BASE_URL}auth/redirect`)
-
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,

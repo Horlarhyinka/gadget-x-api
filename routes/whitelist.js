@@ -6,8 +6,8 @@ const catchAsync = require("../errors/catchAsync")
 
 router.use(catchAsync(authenticate))
 router.use(catchAsync(require("../middlewares/objectID")))
-router.get("/whitelist/:id",catchAsync(whitelist))
-router.delete("/whitelist/:id",catchAsync(removeFromWhitelist))
-router.get("/whitelists",catchAsync(getWhitelists))
+router.post("/:id",catchAsync(whitelist))
+router.delete("/:id",catchAsync(removeFromWhitelist))
+router.get("/",catchAsync(getWhitelists))
 
 module.exports = router

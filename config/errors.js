@@ -2,10 +2,10 @@ const log = require("../logger")
 
 module.exports = () =>{
     process.on("uncaughtException",(ex)=>{
-        log("error","uncaught exception >><< "+ex)
+        log("error","uncaught exception "+ex)
     })
     process.on("unhandledRejection",(ex)=>{
-        log("error","unhandled rejection >><< "+ex)
+        log("error","unhandled rejection "+ex)
     })
     process.on("deprecation",(ex)=>{
         log("warning",ex)

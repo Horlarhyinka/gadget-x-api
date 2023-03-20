@@ -106,7 +106,7 @@ module.exports.whitelist = async(req,res) =>{
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
     const product = await User.findById(req.user._id)
     if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
-    if(isPresent(id,product.whitelist)) return res.status(400).json({message:"product already in whitelist"})
+    if(product.whitelist.includes(id)) return res.status(400).json({message:"product already in whitelist"})
     product.whitelist.push(id)
     return res.status(200).json(_.pick(await product.save(),["whitelist"]))
 }

@@ -12,7 +12,7 @@ router.get("/jumia",catchAsync(getFromJumia))
 router.use(catchAsync(objectID))
 router.get("/:id",catchAsync(getProduct))
 router.get("/:id/related",catchAsync(getRelatedProducts))
-router.post("/react/:id",catchAsync(reactToProduct))
+router.patch("/:id/react",catchAsync(reactToProduct))
 
 router.use(catchAsync(authenticate)) //authenticated routes below
 router.put("/:id",catchAsync(restrictRoute),catchAsync(updateOne))

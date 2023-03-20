@@ -1,5 +1,5 @@
 require("express-async-errors")
-require("./startup/errors")()
+require("./config/errors")()
 require("dotenv").config()
 const express = require("express")
 const app = express()
