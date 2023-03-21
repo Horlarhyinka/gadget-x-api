@@ -19,10 +19,10 @@ const userSchema = new mongoose.Schema({
     picture:{
         type:String
     },
-    whitelist:[{
-        type:mongoose.Schema.Types.ObjectId,
+    whitelist:{
+        type:[mongoose.Schema.Types.ObjectId],
         ref:"product"
-    }],
+    },
     orders:{
         type:[mongoose.Schema.Types.ObjectId],
         ref:"order"

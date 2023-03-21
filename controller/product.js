@@ -104,7 +104,7 @@ module.exports.getComments = async(req,res) =>{
 module.exports.whitelist = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
-    const product = await User.findById(req.user._id)
+    const product = await User.findById(req.user._id).populate("whitelist")
     if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
     if(product.whitelist.includes(id)) return res.status(400).json({message:"product already in whitelist"})
     product.whitelist.push(id)
@@ -120,14 +120,14 @@ module.exports.removeFromWhitelist = async(req,res) =>{
 }
 
 module.exports.getWhitelists = async (req,res) =>{
-    return res.status(200).json(await User.findOne(req.user).populate("product").select("whitelist"))
+    return res.status(200).json(await User.findById(req.user._id).populate("whitelist").select("whitelist"))
 }
 
 module.exports.addToCart = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
     const cart = await User.findByIdAndUpdate(req.user._id,{$addToSet:{cart:id}},{new:true})
-    if(!cart)return res.status(500).json({message:"could not whitelist product,try later"})
+    if(!cart)return res.status(500).json({message:"add to cart,try later"})
     return res.status(200).json(_.pick(cart,["cart"]))
 }
 

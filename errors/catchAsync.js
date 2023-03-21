@@ -5,7 +5,8 @@ const catchAsync = (fn) =>{
         try{
             return await fn(req, res, next)
         }catch(err){
-            log("error", JSON.stringify(ex))
+            console.log(err)
+            log("error", JSON.stringify(err))
             next()
         }
     }
