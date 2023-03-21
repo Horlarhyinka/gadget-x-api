@@ -17,8 +17,8 @@ router.patch("/:id/react",catchAsync(reactToProduct))
 router.use(catchAsync(authenticate)) //authenticated routes below
 router.put("/:id",catchAsync(restrictRoute),catchAsync(updateOne))
 router.delete("/:id",catchAsync(restrictRoute),catchAsync(deleteProduct))
-router.post("/:id/comment",catchAsync(comment))
-router.get("/comments/:id/react",catchAsync(reactToComment))
-router.get("/comments/:id",catchAsync(getComments))
+router.post("/:id/comments",catchAsync(comment))
+router.patch("/comments/:id/react",catchAsync(reactToComment))
+router.get("/:id/comments",catchAsync(getComments))
 
 module.exports = router;
