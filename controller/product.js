@@ -104,17 +104,16 @@ module.exports.getComments = async(req,res) =>{
 module.exports.whitelist = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
-    const product = await User.findById(req.user._id).populate("whitelist")
-    if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
-    if(product.whitelist.includes(id)) return res.status(400).json({message:"product already in whitelist"})
-    product.whitelist.push(id)
-    return res.status(200).json(_.pick(await product.save(),["whitelist"]))
+    const product = await Product.findById(id)
+    if(!product) return res.status(404).json({message: "product not found"})
+    const { whitelist } = await User.findByIdAndUpdate(req.user._id,{$addToSet: {whitelist: id}}, {new: true}).populate("whitelist")
+    return res.status(200).json(whitelist)
 }
 
 module.exports.removeFromWhitelist = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to remove"})
-    const updated = await User.findByIdAndUpdate(req.user._id,{$pull:{whitelist:id}},{new:true})
+    const updated = await User.findByIdAndUpdate(req.user._id,{$pull:{whitelist:id}},{new:true}).populate("whitelist")
     if(!updated) return res.status(500).json({message:"failed to remove, try again later"})
     return res.status(200).json(_.pick(updated,["whitelist"]))
 }
@@ -170,10 +169,10 @@ module.exports.getFromJumia = async(req,res) =>{
     }
     try{
         const data = await getOrSetCache(key,async()=>scraper.scrape(url))
-        if(!data) return res.status(404).json({message:"no related datas were found"})
+        if(!data) return res.status(404).json({message:"failed to fetch"})
         return res.status(200).json(data)
     }catch(err){
-        return res.status(500).json({message:"could not get jumia data"})
+        return res.status(500).json({message:"ffailed to fetch data"})
     }
 }
 
