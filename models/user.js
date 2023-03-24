@@ -27,14 +27,14 @@ const userSchema = new mongoose.Schema({
         type:[mongoose.Schema.Types.ObjectId],
         ref:"order"
     },
-    cart:[{
-        type:mongoose.Schema.Types.ObjectId,
+    cart:{
+        type:[mongoose.Schema.Types.ObjectId],
         ref:"product"
-    }],
-    history:[{
-        type:mongoose.Schema.Types.ObjectId,
+    },
+    history:{
+        type:[mongoose.Schema.Types.ObjectId],
         ref:"order"
-    }],
+    },
     tokenExpireTime:{
         type:Date
     }

@@ -125,7 +125,7 @@ module.exports.getWhitelists = async (req,res) =>{
 module.exports.addToCart = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to whitelist"})
-    const cart = await User.findByIdAndUpdate(req.user._id,{$addToSet:{cart:id}},{new:true})
+    const cart = await User.findByIdAndUpdate(req.user._id,{$addToSet:{cart:id}},{new:true}).populate("cart")
     if(!cart)return res.status(500).json({message:"add to cart,try later"})
     return res.status(200).json(_.pick(cart,["cart"]))
 }
@@ -137,15 +137,15 @@ module.exports.getCart = async(req,res)=>{
 module.exports.removeFromCart = async(req,res) =>{
     const {id} = req.params
     if(!id) return res.status(400).json({message:"please select a product to remove"})
-    const updated = await User.findByIdAndUpdate(req.user._id,{$pull:{cart:id}},{new:true})
-    if(!updated) return res.status(500).json({message:"failed to remove, try again later"})
+    const updated = await User.findByIdAndUpdate(req.user._id,{$pull: {cart: id}},{new: true}).populate("cart")
+    if(!updated) return res.status(500).json({message: "failed to remove, try again later"})
     return res.status(200).json(_.pick(updated,["cart"]))
 }
 
 module.exports.clearCart = async(req,res) =>{
-    const user = await User.findById(req.user._id)
+    let user = await User.findById(req.user._id)
     user.cart = [];
-    await user.save()
+    user = await user.save()
     return res.status(200).json(user.cart)
 }
 
@@ -153,8 +153,11 @@ module.exports.getRelatedProducts = async(req,res) =>{
     const {id} = req.params
     const product = await Product.findById(id)
     if(!product) return res.status(404).json({message:"product not found"})
-    const products = await Product.find({category:product.category})
-    return res.status(200).json(products.filter(prod=>Math.abs(product.price-prod.price) <= 20 && String(prod._id) !== id))
+    let products = await Product.find()
+    const filtered = products.map(prod =>{
+        return (String(prod._id) !== String(product._id) && prod.quantity > 1) && prod.category.includes(product.category) || product.category.includes(prod.category) || (prod.name + prod.description).includes(product.name) || Math.abs(Number(prod.price) - Number(product.abs)) < 1000
+    })
+    return res.status(200).json(filtered)
 }
 
 
