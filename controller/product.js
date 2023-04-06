@@ -44,7 +44,7 @@ module.exports.deleteProduct = async(req,res)=>{
 module.exports.updateOne = async(req,res) =>{
     let product = await Product.findById(req.params.id)
     const updates = req.body
-
+if(!product)return res.status(404).json({message: "product not found"})
     for(let update of Object.keys(updates)){
         if(updates[update] && updates[update] !== product[update]){
             product[update] = updates[update]
