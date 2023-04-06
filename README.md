@@ -80,3 +80,6 @@ add product is restricted to users of _kind admin only
 
 an admin can only be authorized by an authorized admin
 
+see link below to view documentation in postman
+
+https://documenter.getpostman.com/view/20519100/2s93RZLpYY
