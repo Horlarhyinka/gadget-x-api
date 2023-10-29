@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const categories = require("../util/categories")
+require("./user")
 const commentSchema = new mongoose.Schema({
     productId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -13,8 +15,16 @@ const commentSchema = new mongoose.Schema({
         required:true
     },
     reactions:{
-        type:Object,
-        default:{}
+        likes: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "user",
+            default:[]
+        },
+        dislikes: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "user",
+            default:[]
+        },
     },
 },
 {
@@ -32,7 +42,7 @@ const productSchema = new mongoose.Schema({
     },
     category:{
         type:String,
-        enum:["Phones and Tablets","Laptops and MacBooks","Watches","Headphones","Power Banks","Others"],
+        enum:categories,
         required:true
     },
     price:{
@@ -58,8 +68,16 @@ const productSchema = new mongoose.Schema({
         ref:"comment"
     }],
     reactions:{
-        type:Object,
-        default:{}
+        likes: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "user",
+            default:[]
+        },
+        dislikes: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "user",
+            default:[]
+        },
     },
     description:{
         type:String

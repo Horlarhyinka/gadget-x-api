@@ -49,7 +49,7 @@ this.password = await bcrypt.hash(this.password,salt)
 })
 
 userSchema.methods.genToken = async (payload) =>{
-    return jwt.sign({payload},process.env.SECRET,{expiresIn:Date.now() + 2 * 60 * 60})
+    return jwt.sign({payload},process.env.SECRET,{ expiresIn: "2d" })
 }
 userSchema.methods.validateInfo = async(req,res) =>{
     const validate = validateUser(req.body)

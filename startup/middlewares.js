@@ -17,7 +17,7 @@ app.use(cors({
 app.use(session({
     secret:process.env.SECRET,
     resave:false,
-    saveUninitialized:false,
+    saveUninitialized:true,
     store:MongoStore.create({
         mongoUrl:process.env.DB_URL
     })

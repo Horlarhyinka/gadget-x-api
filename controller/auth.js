@@ -66,11 +66,11 @@ module.exports.adminlogin = async(req,res)=>{
 module.exports.passportRedirect = async(req,res) =>{
     const user = req.user
     if(!user) return res.status(500).json({message:"server error"})
-    let result = await User.findOne({email:user.email})
-    const token = await result.genToken(result._id)
-    await sendCookie(token, res)
+    const token = await user.genToken(user._id)
+    const payload = token + "; " + "email=" + user.email + "; " + "id=" + user._id
+    await sendCookie(payload, res)
     user.password = null
-    return res.status(200).json({data: user, token})
+    return res.redirect(process.env.APP_UI_URL + "/auth/redirect")
 }
 
 module.exports.forgetPassword = async(req,res) =>{
@@ -110,5 +110,5 @@ module.exports.resetPassword = async(req,res)=>{
 
 function sendCookie(payload,res){
     res.set("x-auth-token",payload)
-    return res.cookie("x-auth-token",payload,{expires:new Date(Date.now()+ process.env.AGE * 1000) })
+    return res.cookie("x-auth-token",payload,{expires:new Date(Date.now()+Number( process.env.AGE) * 1000) })
 }

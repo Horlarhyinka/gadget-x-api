@@ -1,0 +1,1 @@
+module.exports = ["phones and tablets","laptops and macbooks","audio","power", "gaming","others"]

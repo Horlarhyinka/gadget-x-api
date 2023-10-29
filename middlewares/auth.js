@@ -2,10 +2,12 @@ require("dotenv").config()
 const { User } = require("../models/user")
 const {extractToken} = require("../util/auth")
 const jwt = require("jsonwebtoken")
+const catchAsyncError = require("../errors/catchAsync")
 require("dotenv").config()
 
 
-module.exports.authenticate = async(req,res,next) =>{
+module.exports.authenticate = catchAsyncError(async(req,res,next) =>{
+
 
     const sendUnauthenticated = async() =>{
         return res.status(401).json({message:"unauthenticated"})
@@ -24,4 +26,4 @@ module.exports.authenticate = async(req,res,next) =>{
         sendUnauthenticated()
     }
     
-}
+})

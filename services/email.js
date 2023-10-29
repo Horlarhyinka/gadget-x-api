@@ -4,7 +4,7 @@ const ejs = require("ejs")
 const path = require("path")
 
 const sendMail = async(reciever,type,options) =>{
-    options = {duration:process.env.DURATION,...options,email:reciever}
+    options = {duration:process.env.DURATION || 5*1000,...options,email:reciever}
 file = await ejs.renderFile(path.resolve(__dirname,`../views/containers/${type}.ejs`),options)
 
     const mailOptions = {
@@ -16,10 +16,9 @@ file = await ejs.renderFile(path.resolve(__dirname,`../views/containers/${type}.
     const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST,
         port: process.env.MAIL_PORT,
-        secure:true,
-        service:"gmail",
+        service: process.env.MAIL_SERVICE,
         auth: {
-            user:process.env.MAIL_ADDRESS,
+            user:process.env.MAIL_USER,
             pass:process.env.MAIL_PASSWORD
         }
     })

@@ -4,11 +4,13 @@ const Strategy = require("passport-google-oauth20");
 const _ = require("lodash");
 const { User } = require("../models/user");
 
+const redirect_url = `${process.env.BASE_URL}auth/redirect`
+
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: `${process.env.BASE_URL}auth/redirect`,
-    redirect_url: `${process.env.BASE_URL}auth/redirect`
+    redirect_url
 },async(accessToken,refreshToken,profile,done)=>{
     const {id, _json } = profile 
     const data = {password:id, email: _json.email}

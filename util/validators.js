@@ -2,6 +2,7 @@ const objectId = require("joi-objectid")
 const joi = require("joi")
 const jwt = require("jsonwebtoken")
 const mongoose= require("mongoose")
+const categories = require("./categories")
 
 module.exports.validateUser = (input) =>{
    return joi.object({
@@ -19,8 +20,7 @@ module.exports.validateAdmin = (input) =>{
 }
 
 module.exports.validateProduct = (input) =>{
-    const categories = ["Phones and Tablets","Laptops and MacBooks","Watches","Headphones","Power Banks","Others"]
-    if(!categories.includes(input.category)) return {error:{details:`category can only be ${categories}`}};
+    if(!categories.includes(input.category)) return {error:{details:{message: `category can only be ${categories}`}}};
     return joi.object({
         name: joi.string().required().trim(),
         category:joi.string().required(),
@@ -38,7 +38,7 @@ module.exports.validateId = (input) =>{
 }
 
 module.exports.validateReaction = (reaction)=>{
-    reaction = reaction.toLowerCase()
+    reaction = reaction?.toLowerCase()
     const valid = ["like","dislike","haha","angry"]
     return valid.includes(reaction)
 }

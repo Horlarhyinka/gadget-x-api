@@ -7,27 +7,52 @@ const scraper = require("../util/scraper")
 const {getOrSetCache} = require("../services/cache")
 
 module.exports.getProducts = async(req,res)=>{  
-    const {count,page, category} = req.query;
-
-    if(req.user?._kind?.toLowerCase() === "admin"){
-        return res.status(200).json({data: await Product.find({quantity:{$gte:1}})})
+    let {category, search} = req.query;
+    const page = req.query.page || 1
+    const count = req.query.count || 20
+    let result = {
+        page: 1,
+        total: 0,
+        data: []
     }
+    search = search?.trim().replace(/[\[\]\.\-\(\)]/g, "")
+    let searchReqex = new RegExp(`${search}`, "gi");
 
+    if(category?.toLowerCase() === "all"){
+        category = undefined
+    }
+    if(!search || search.toLowerCase() === "all"){
+        searchReqex = /./
+    }
     if(category){
-        try{
-            if(count && page) return res.status(200).json(await Product.find({category, quantity:{$gte:1}}).skip((page - 1) * count).limit(count))
-     return res.status(200).json(await Product.find({category, quantity:{$gte:1}}))
-        }catch{
-            return res.status(400).json({message:"invalid entry"})
-        }
+        category = category.toLowerCase().replace(/^\s&\s$/g, " and ")
+        result.data = await Product.find({category})
+        .or([{name: {$regex: searchReqex}}, 
+        {description: {$regex: searchReqex}}])
+        .skip((page - 1) * count)
+        .limit(count)
+        result.total = await Product.countDocuments({category})
+        .or([{name: {$regex: searchReqex}}, 
+        {description: {$regex: searchReqex}}])
+    }else{
+        result.data = await Product
+        .find({})
+        .or([{name: {$regex: searchReqex}}, 
+        {description: {$regex: searchReqex}}])
+        .skip((page - 1) * count).limit(count)
+        result.total = await Product.countDocuments()
+        .or([{name: {$regex: searchReqex}}, 
+        {description: {$regex: searchReqex}}])
+        console.log({searchReqex, search})
     }
-    if(count && page) return res.status(200).json(await Product.find({quantity:{$gte:1}}).skip((page - 1) * count).limit(count))
-     return res.status(200).json(await Product.find({quantity:{$gte:1}}))
+    return res.status(200).json(result)
 }
 module.exports.createProduct = async(req,res) =>{
-    const validate = validateProduct(req.body)
-    if(validate.error) return res.status(400).json({message:validate.error.details})
-    return res.status(200).json(await Product.create(req.body))
+    const productObj = {...req.body, category: req.body.category?.toLowerCase()}
+    const validate = validateProduct(productObj)
+    if(validate.error) return res.status(400).json({message:validate.error.details.message})
+    const product = await Product.create(productObj)
+    return res.status(200).json(product)
 }
 module.exports.getProduct = async(req,res)=>{
     const {id } = req.params
@@ -55,16 +80,22 @@ if(!product)return res.status(404).json({message: "product not found"})
 }
 
 module.exports.reactToProduct = async(req,res) =>{
-    const reaction = req.query.reaction
+    const reaction = req.query.reaction?.toLowerCase()
     const id = req.params.id
-    if(!validateReaction(reaction))return res.status(400).json({message:"invalid entry"})
+    if(!validateReaction(reaction))return res.status(400).json({message:"invalid reaction"})
+    const reactionGroup = reaction + "s"
     if(!id) return res.status(400).json({message:"please select a product"})
     if(!reaction) return res.status(400).json({message:"please select a reaction to react"})
     const product = await Product.findById(id)
     if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
-    product.reactions = {...product.reactions,[reaction]:(product.reactions[reaction]+1) || 1}
+    if(product.reactions[reactionGroup]?.includes(String(req.user._id))){
+        product.reactions[reactionGroup] = product.reactions[reactionGroup].filter(userId =>String(userId) !== String(req.user._id))
+    }else{
+        product.reactions[reactionGroup].push(String(req.user._id))
+    }
     return res.status(200).json(await product.save())
 } 
+
 module.exports.comment = async(req,res) =>{
     const {id} = req.params
     const {body} = req.body
@@ -73,7 +104,7 @@ module.exports.comment = async(req,res) =>{
     const product = await Product.findById(id).populate("comments")
     if(!product)return res.status(400).json({message:"sorry, this product does not exist"})
     const newComment = await Comment.create({email:req.user.email, body})
-    if(!newComment) return res.status(500).json({message:"internal server error, try later"})
+    if(!newComment) return res.status(500).json({message:"failed to post comment, try later"})
     product.comments.push(newComment)
     const {comments} = await product.save()
     return res.status(200).json({data:comments})
@@ -81,15 +112,18 @@ module.exports.comment = async(req,res) =>{
 }
 
 module.exports.reactToComment = async(req,res) =>{
-    const reaction = req.query.reaction || req.body.reaction
+    const reaction = (req.query.reaction || req.body.reaction)?.toLowerCase()
     const commentID = req.params.id
-    if(!commentID) return res.status(400).json({message:"please select a comment"})
-    if(!reaction) return res.status(400).json({message:"please select a reaction to react"})
-    if(!validateReaction(reaction)) return res.status(400).json({message:"invalid entry"})
+    if(!commentID) return res.status(400).json({message:"commentId is required"})
+    if(!reaction) return res.status(400).json({message:"select a reaction to react"})
+    if(!validateReaction(reaction)) return res.status(400).json({message:`invalid reaction ${reaction}`})
     const comment = await Comment.findById(commentID)
-    if(!comment)return res.status(400).json({message:"sorry, this comment does not exist"})
-    if(!comment.reactions[reaction]){comment.reactions[reaction] = 1}
-    comment.reactions[reaction] += 1
+    if(!comment)return res.status(400).json({message:"comment not found"})
+    if(!comment.reactions[reaction].includes(String(req.user._id))){
+        comment.reactions[reaction] = comment.reactions[reaction].filter(userId=>userId !== String(req.user._id))
+    }else{
+        comment.reactions[reaction].push(String(req.user._id))
+    }
     return res.status(200).json(await comment.save())
 }
 
@@ -98,7 +132,6 @@ module.exports.getComments = async(req,res) =>{
     if(!id) return res.status(400).json({message:"please select a product"})
     const {comments} = await Product.findById(id).select("comments").populate("comments")
     return res.status(200).json(comments)
-
 }
 
 module.exports.whitelist = async(req,res) =>{
@@ -154,8 +187,8 @@ module.exports.getRelatedProducts = async(req,res) =>{
     const product = await Product.findById(id)
     if(!product) return res.status(404).json({message:"product not found"})
     let products = await Product.find()
-    const filtered = products.map(prod =>{
-        return (String(prod._id) !== String(product._id) && prod.quantity > 1) && prod.category.includes(product.category) || product.category.includes(prod.category) || (prod.name + prod.description).includes(product.name) || Math.abs(Number(prod.price) - Number(product.abs)) < 1000
+    const filtered = products.filter(prod =>{
+        return prod.category.includes(product.category) || product.category.includes(prod.category) || (prod.name + prod.description).includes(product.name) || Math.abs(Number(prod.price) - Number(product.abs)) < 1000
     })
     return res.status(200).json(filtered)
 }

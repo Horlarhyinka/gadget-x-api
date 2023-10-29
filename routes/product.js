@@ -6,15 +6,15 @@ const {authenticate} = require("../middlewares/auth")
 const restrictRoute = require("../middlewares/restrict-to-admin")
 const catchAsync = require("../errors/catchAsync")
 
-router.post("/",catchAsync(authenticate),catchAsync(restrictRoute),catchAsync(createProduct))
+router.post("/", authenticate,catchAsync(restrictRoute),catchAsync(createProduct))
 router.get("/",catchAsync(getProducts))
 router.get("/jumia",catchAsync(getFromJumia))
-router.use(catchAsync(objectID))
+router.use(objectID)
 router.get("/:id",catchAsync(getProduct))
 router.get("/:id/related",catchAsync(getRelatedProducts))
-router.patch("/:id/react",catchAsync(reactToProduct))
 
-router.use(catchAsync(authenticate)) //authenticated routes below
+router.use(authenticate) //authenticated routes below
+router.patch("/:id/react",catchAsync(reactToProduct))
 router.put("/:id",catchAsync(restrictRoute),catchAsync(updateOne))
 router.delete("/:id",catchAsync(restrictRoute),catchAsync(deleteProduct))
 router.post("/:id/comments",catchAsync(comment))
