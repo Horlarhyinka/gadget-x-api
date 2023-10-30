@@ -1,9 +1,9 @@
-require("dotenv").config()
+require("dotenv").config();
 const mongoose = require("mongoose");
-const log = require("../logger")
+const log = require("../logger");
 
+module.exports.connectDB = (uri) => {
+  const options = { useNewUrlParser: true, useUnifiedTopology: true }; // Add the necessary options
 
-module.exports.connectDB = (uri) =>{
-const options = {mongoUrl: uri}
-    return mongoose.connect(options.mongoUrl, options)
-}
+  return mongoose.connect(uri, options);
+};
