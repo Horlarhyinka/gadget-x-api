@@ -2,3 +2,4 @@ mylogs.log
 node_modules
 .env
 /coverage
+gadget-x-key.pem

@@ -1,13 +1,12 @@
 require("dotenv").config()
 const log = require("../logger")
-const REDISUSER = process.env.REDISUSER
 const REDISPASSWORD = process.env.REDISPASSWORD
 const REDISHOST = process.env.REDISHOST
 const REDISPORT = process.env.REDISPORT
 
 const {createClient} = require("redis")
 const options = process.env.NODE_ENV !== "production"?{}:{
-    url:`redis://${REDISUSER}:${REDISPASSWORD}@${ REDISHOST }:${ REDISPORT }`,
+    password: REDISPASSWORD,
     socket: {
     host: REDISHOST,
     port: REDISPORT  ,
