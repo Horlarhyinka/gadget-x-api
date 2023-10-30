@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(require("cookie-parser")())
 app.use(cors({
-    origin: process.env.APP_API_URL,
+    origin: "*",
     credentials: true,
     optionSuccessStatus:200
     }))
