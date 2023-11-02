@@ -43,7 +43,6 @@ module.exports.getProducts = async(req,res)=>{
         result.total = await Product.countDocuments()
         .or([{name: {$regex: searchReqex}}, 
         {description: {$regex: searchReqex}}])
-        console.log({searchReqex, search})
     }
     return res.status(200).json(result)
 }
