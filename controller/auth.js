@@ -110,5 +110,5 @@ module.exports.resetPassword = async(req,res)=>{
 
 function sendCookie(payload,res){
     res.set("x-auth-token",payload)
-    return res.cookie("x-auth-token",payload,{expires:new Date(Date.now()+Number( process.env.AGE) * 1000) })
+    return res.cookie("x-auth-token",payload,{expires:new Date(Date.now()+(2 * 24 * 3600 * 1000)) })
 }
