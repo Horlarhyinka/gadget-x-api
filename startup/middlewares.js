@@ -9,8 +9,17 @@ module.exports = (app) =>{
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(require("cookie-parser")())
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === "production"?process.env.APP_UI_URL:"http://localhost:8080");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+    next();
+});
 app.use(cors({
-    origin: "*",
+    origin: process.env.NODE_ENV === "production"?process.env.APP_UI_URL:"*",
     credentials: true,
     optionSuccessStatus:200
     }))
