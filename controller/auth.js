@@ -110,9 +110,9 @@ module.exports.resetPassword = async(req,res)=>{
 
 function sendCookie(payload,res){
     res.set("x-auth-token",payload)
-    let options = {expires:new Date(Date.now()+(2 * 24 * 3600 * 1000)) }
+    let options = {expires:new Date(Date.now()+(2 * 24 * 3600 * 1000)), httpOnly: false, domain: process.env.APP_UI_URL }
     if(process.env.NODE_ENV === "production"){
-        options = {...options, secure: true, sameSite: "Lax", httpOnly: false, domain: process.env.APP_UI_URL}
+        options = {...options, secure: true, sameSite: "Lax"}
     }
     return res.cookie("x-auth-token",payload,options)
 }
