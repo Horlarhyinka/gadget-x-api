@@ -112,7 +112,7 @@ function sendCookie(payload,res){
     res.set("x-auth-token",payload)
     let options = {expires:new Date(Date.now()+(2 * 24 * 3600 * 1000)) }
     if(process.env.NODE_ENV === "production"){
-        options = {...options, secure: true, sameSite: "Lax"}
+        options = {...options, secure: true, sameSite: "Lax", httpOnly: false}
     }
     return res.cookie("x-auth-token",payload,options)
 }
