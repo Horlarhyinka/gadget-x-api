@@ -1,7 +1,6 @@
-"# gadget-x api" 
-
+<h1>Project Overview</h1>
 A REST api for an e-commerce website which enables cross-platform shopping built with node js(javascript)
-
+<h4>Technologies</h4>
 Technologies used:
 - Node js
 - express
