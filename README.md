@@ -40,6 +40,7 @@ A REST api for an e-commerce website which enables secure in-app transactions an
  <li>visit <a href="https://redis.io/docs/install/install-redis/">https://redis.io/docs/install/install-redis/</a> for instructions on how to install redis-server on your OS</li>
  <li>run `npm install`</li>
  <li>setup environment variables</li>
+ <li>run `sudo service redis-server start` to start redis-server.</li>
  <li>run `npm run Dev` to get started in development mode</li>
 </ol>
 <h1>Developer documentation</h1>
