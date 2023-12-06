@@ -1,84 +1,47 @@
-<h1>Project Overview</h1>
-A REST api for an e-commerce website which enables cross-platform shopping built with node js(javascript)
+<p>Welcome to gadget-x project, a backend api for an e-commerce application.</p>
+<h1>Introduction</h1>
+<p>
+A REST api for an e-commerce website which enables secure in-app transactions and cross-platform shopping. This project is a node based project built with javascript programming language, mongodb (nosql database), and Redis (for caching). The technologies implemented include.
+</p>
 <h4>Technologies</h4>
-Technologies used:
-- Node js
-- express
-- mongodb
-- redis
-- cheerio
-- nodemailer
-- paystack
-- passport
-- jwt
+<ul>
+ <li>nodejs</li>
+ <li>mongodb</li>
+ <li>redis</li>
+ <li>cheerio</li>
+ <li>passport js</li>
+ <li>paystack</li>
+</ul>
+<h4>Features</h4>
+<ul>
+ <li>Authentication: user login/register/forget-password implemented with jwt and google oauth2.0 with passport.js</li>
+ <li>Authorization: Authorization for both admin product manager endpoints and customer user endpoints.</li>
+ <li>product inventory management: CRUD (create, read, update, and delete) operations on products in inventory by an authorized product manager.</li>
+ <li>In-app shopping: CRUD operations on items in cart and also a secure payment processing.</li>
+ <li>crossplatform-shopping: this feature extends your search to products on jumia and makes it possible to navigate products from jumia on the application. </li>
+</ul>
+<h1>contributing</h1>
+<p>follow the following steps to contribute to this project.</p>
+<ol>
+ <li>fork the repository by clicking the icon on the top right corner of the screen.</li>
+ <li>contribute to project.</li>
+ <li>create pull request.</li>
+</ol>
+<h1>Getting started.</h1>
+<i>prerequisites</i>
+<ul>
+ <li>node version 16.0 or above.</li>
+ <li>redis-server</li>
+</ul>
+<p>to get started with this project:</p>
+<ol>
+ <li> visit <a href="https://nodejs.org/en/download" >https://nodejs.org/en/download</a> to install latest version of nodejs on your computer
+</li>
+ <li>visit <a href="https://redis.io/docs/install/install-redis/">https://redis.io/docs/install/install-redis/</a> for instructions on how to install redis-server on your OS</li>
+ <li>run `npm install`</li>
+ <li>setup environment variables</li>
+ <li>run `npm run Dev` to get started in development mode</li>
+</ol>
+<h1>Developer documentation</h1>
+<p>reference the <a href="https://documenter.getpostman.com/view/20519100/2s93RZLpYY" >developer documentation</a> for api usage.</p>
 
-**installation**
-1. Clone the repository: git clone https://github.com/Horlarhyinka/gadget-x-api.git
-2. Install dependencies: run `npm install`
-3. install redis-server (check https://redis.io/docs/getting-started/ for instructions)
-4. create .env file in project root directory and add all variables listed below
-
-#PORT -- port number to run application 
-
-#BASE_URL -- api base url http://localhost:<port>/api/v1/ 
-
-#SECRET -- api secret e.g hjwgqdjkjhqkejhk712613681
-
-#AGE -- token expiration age e.g 3600
-
-#DB_URL -- database connection string e.g mongodb://localhost:27017/<db name>
- 
-#CLIENT_ID -- client ID for google oauth (create credentials at https://console.cloud.google.com)
-
-#CLIENT_SECRET -- client secret for google oauth
-
-#MAIL_HOST --  mail host for nodemailer config smtp.gmail.com or smtp.mailtrap.io to use mailtrap service
-
-#MAIL_PORT -- mail port for nodemailer config 465
-
-#MAIL_PASSWORD -- application specific password from gmail see https://support.google.com/mail/answer/185833?hl=en on ho to generate password
-
-#PAYSTACK_SECRET -- for paystack api
-
-#PAYSTACK_TEST_PUBLIC_KEY -- paystack api publick key(test mode)
-
-#PAYSTACK_BASE_URL -- paystack api base url https://api.paystack.co/transaction/
-
-#CACHE_TIME -- cache time for redis storage 216000
-
-#MAIL_ADDRESS -- email address user@gmail.com
-
-#DURATION -- constant value used in email template
-
-#REDISHOST -- for redis configuration (required only in production environment)
-
-#REDISPASSWORD -- for redis configuration (required only in production environment)
-
-#REDISPORT -- for redis configuration (required only in production environment)
-
-#REDISUSER -- for redis configuration (required only in production environment)
-
-5. start redis-server from terminal (wsl on windows) `sudo service redis-server start`
-6. run `npm start`
-
-**Usage**
-
-project includes CRUD operations for getting e-commerce data.
-
-external datas can be fetched from jumia.com (web scraped with cheerio)
-
-authentication is implemented with jwt and oauth2.0 passport authentication
-
-caching was implemented with redis to improve performance and speed
-
-payments (test mode ) implemented with paystack
-
-email services for after-order confirmation, new admin sign-up, and news-letter
-
-add product is restricted to users of _kind admin only
-
-an admin can only be authorized by an authorized admin
-
-see link below to view documentation in postman
-
-https://documenter.getpostman.com/view/20519100/2s93RZLpYY
