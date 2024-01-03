@@ -4,7 +4,8 @@ const { validateProduct, idIsPresent, isPresent, validateReaction } = require(".
 const _ = require("lodash");
 const { User } = require("../models/user");
 const scraper = require("../util/scraper")
-const {getOrSetCache} = require("../services/cache")
+const {getOrSetCache} = require("../services/cache");
+const logger = require("../logger");
 
 module.exports.getProducts = async(req,res)=>{  
     let {category, search} = req.query;
@@ -207,7 +208,8 @@ module.exports.getFromJumia = async(req,res) =>{
         if(!data) return res.status(404).json({message:"failed to fetch"})
         return res.status(200).json(data)
     }catch(err){
-        return res.status(500).json({message:"ffailed to fetch data"})
+        logger("error", err)
+        return res.status(500).json({message:"failed to fetch data"})
     }
 }
 

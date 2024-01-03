@@ -8,7 +8,8 @@ module.exports = () =>{
         log("error","unhandled rejection "+ex)
     })
     process.on("deprecation",(ex)=>{
-        log("warning",ex)
+        console.log(ex)
+        log("info",ex)
     })
 }
 

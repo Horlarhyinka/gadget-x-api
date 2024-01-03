@@ -27,9 +27,17 @@ client.connect().then(()=>{
 })
 
 module.exports.getOrSetCache = async(key,callback)=>{
-    const cached = await client.get(key);
-    if(cached) return JSON.parse(cached);
-    const data = await callback()
-    await client.setEx(key,process.env.CACHE_TIME,JSON.stringify(data))
+    try{
+        const cached = await client.get(key);
+        if(cached) return JSON.parse(cached);
+        const data = await callback()
+    try{
+        await client.setEx(key,process.env.CACHE_TIME || 2 * 60 * 60 * 1000,JSON.stringify(data))
+    }catch(ex){
+        return data
+    }
     return data;
+    }catch(ex){
+        throw ex
+    }
 }
