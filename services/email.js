@@ -1,25 +1,25 @@
-require("dotenv").config()
+const config = require("../config/config")
 const nodemailer = require("nodemailer")
 const ejs = require("ejs")
 const path = require("path")
 
 const sendMail = async(reciever,type,options) =>{
-    options = {duration:process.env.DURATION || 5*1000,...options,email:reciever}
+    options = {duration: 5*1000,...options,email:reciever}
 file = await ejs.renderFile(path.resolve(__dirname,`../views/containers/${type}.ejs`),options)
 
     const mailOptions = {
-        from:process.env.MAIL_ADDRESS,
+        from:config.mailAddress,
         to:reciever,
         html:file
     }
     try{
     const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST,
-        port: process.env.MAIL_PORT,
-        service: process.env.MAIL_SERVICE,
+        host: config.mailHost,
+        port: config.mailPort,
+        service: config.mailService,
         auth: {
-            user:process.env.MAIL_USER,
-            pass:process.env.MAIL_PASSWORD
+            user: config.mailUser,
+            pass:config.mailPassword
         }
     })
 

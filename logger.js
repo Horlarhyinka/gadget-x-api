@@ -1,12 +1,12 @@
-require("dotenv").config()
 const winston = require("winston")
+const config = require("./config/config")
 
 const logger = winston.createLogger({
     transports:[
         new winston.transports.File({filename:"mylogs.log"}),
 ]
 })
-if(process.env.NODE_ENV !== "production"){
+if(config.env !== "production"){
     logger.add(new winston.transports.Console())
 }
 

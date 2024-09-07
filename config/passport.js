@@ -1,15 +1,15 @@
-require("dotenv").config()
 const passport = require("passport");
 const Strategy = require("passport-google-oauth20");
 const _ = require("lodash");
 const { User } = require("../models/user");
+const config = require("./config")
 
-const redirect_url = `${process.env.BASE_URL}auth/redirect`
+const redirect_url = `${config.baseURL}auth/redirect`
 
 passport.use(new Strategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}auth/redirect`,
+    clientID: config.clientId,
+    clientSecret: config.clientSecret,
+    callbackURL: redirect_url,
     redirect_url
 },async(accessToken,refreshToken,profile,done)=>{
     const {id, _json } = profile 

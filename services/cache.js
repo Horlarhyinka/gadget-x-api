@@ -1,20 +1,17 @@
-require("dotenv").config()
+const config = require("../config/config")
 const log = require("../logger")
-const REDISPASSWORD = process.env.REDISPASSWORD
-const REDISHOST = process.env.REDISHOST
-const REDISPORT = process.env.REDISPORT
 
 const {createClient} = require("redis")
-const options = process.env.NODE_ENV !== "production"?{}:{
-    password: REDISPASSWORD,
+const options = config.env !== "production"?{}:{
+    password: config.redisPassword,
     socket: {
-    host: REDISHOST,
-    port: REDISPORT  ,
+    host: config.redisHost,
+    port: config.redisPort ,
     reconnectStrategy: retries => Math.min(retries * 50, 1000)
     },  
 }
  let client;
- if(process.env.NODE_ENV === "production"){
+ if(config.env === "production"){
     client = createClient(options)
  }else{
     client = createClient()
@@ -32,7 +29,7 @@ module.exports.getOrSetCache = async(key,callback)=>{
         if(cached) return JSON.parse(cached);
         const data = await callback()
     try{
-        await client.setEx(key,process.env.CACHE_TIME || 2 * 60 * 60 * 1000,JSON.stringify(data))
+        await client.setEx(key,config.cacheTime || 2 * 60 * 60 * 1000,JSON.stringify(data))
     }catch(ex){
         return data
     }

@@ -1,11 +1,12 @@
 require("express-async-errors")
 require("./config/errors")()
-require("dotenv").config()
+
+const config = require("./config/config")
 const express = require("express")
 const app = express()
 const http =  require("http")
 let Server
-const PORT = process.env.PORT   
+const PORT = config.port  
 const log = require("./logger")
 const {connectDB} = require("./config/db")
 const mongoose = require("mongoose")
@@ -17,7 +18,7 @@ async function start(){
     try{  Server = http.createServer(app).listen(PORT,()=>{
         log("info",`connected to port ${PORT}`)
     }) 
-      connectDB(process.env.DB_URL).then(()=>{
+      connectDB(config.dbUrl).then(()=>{
         log("info","connected to db")
       }).catch((err)=>{
         log("error","could not connect to db"+err)})

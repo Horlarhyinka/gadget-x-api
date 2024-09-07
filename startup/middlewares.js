@@ -1,4 +1,4 @@
-require("dotenv").config()
+const config = require("../config/config")
 const express = require("express")
 const session = require("express-session")
 const MongoStore = require("connect-mongo")
@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(require("cookie-parser")())
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === "production"?process.env.APP_UI_URL:"http://localhost:8080");
+    res.header("Access-Control-Allow-Origin", config.env === "production"? config.clientUrl:"http://localhost:8080");
     res.header(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept"
@@ -19,16 +19,16 @@ app.use(function (req, res, next) {
     next();
 });
 app.use(cors({
-    origin: process.env.NODE_ENV === "production"?process.env.APP_UI_URL:"*",
+    origin: config.env === "production"?config.clientUrl:"*",
     credentials: true,
     optionSuccessStatus:200
     }))
 app.use(session({
-    secret:process.env.SECRET,
+    secret:config.secret,
     resave:false,
     saveUninitialized:true,
     store:MongoStore.create({
-        mongoUrl:process.env.DB_URL
+        mongoUrl:config.dbUrl
     })
 }))
 app.use(passport.initialize())

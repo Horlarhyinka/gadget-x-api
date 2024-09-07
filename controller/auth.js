@@ -1,4 +1,4 @@
-require("dotenv").config()
+const config = require("../config/config")
 const bcrypt = require("bcrypt")
 const { User } = require("../models/user")
 const Admin = require("../models/admin")
@@ -70,7 +70,7 @@ module.exports.passportRedirect = async(req,res) =>{
     const payload = token + "; " + "email=" + user.email + "; " + "id=" + user._id
     await sendCookie(payload, res)
     user.password = null
-    return res.redirect(process.env.APP_UI_URL + "/auth/redirect")
+    return res.redirect(config.clientUrl + "/auth/redirect")
 }
 
 module.exports.forgetPassword = async(req,res) =>{
@@ -82,7 +82,7 @@ module.exports.forgetPassword = async(req,res) =>{
     user.passwordResetToken = token;
     user.tokenExpireTime = Date.now() + (1000*60*60*2) //token expires in 2 hrs
     await user.save()
-    const resetUrl = `${process.env.APP_UI_URL}/forget-password/${token}`
+    const resetUrl = `${config.clientUrl}/forget-password/${token}`
     await sendMail(email,"forget-password",{resetUrl})
     return res.status(200).json({message:`please check ${email} inbox`})
 }
@@ -110,8 +110,8 @@ module.exports.resetPassword = async(req,res)=>{
 
 function sendCookie(payload,res){
     res.set("x-auth-token",payload)
-    let options = {expires:new Date(Date.now()+(2 * 24 * 3600 * 1000)), httpOnly: false, domain: process.env.NODE_ENV === "production"? ".vercel.app": "localhost" }
-    if(process.env.NODE_ENV === "production"){
+    let options = {expires:new Date(Date.now()+(2 * 24 * 3600 * 1000)), httpOnly: false, domain: config.env === "production"? ".vercel.app": "localhost" }
+    if(config.env === "production"){
         options = {...options, secure: true, sameSite: "none"}
     }
     return res.cookie("x-auth-token",payload,options)

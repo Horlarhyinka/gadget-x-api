@@ -1,15 +1,15 @@
-require("dotenv").config()
+const config = require("../config/config")
 const axios = require("axios")
 const _ = require("lodash")
 
 
     
-    const initEndPoint = `${process.env.PAYSTACK_BASE_URL}initialize`
+    const initEndPoint = `${config.paystackBaseUrl}initialize`
     const initializeOptions = {
         method:"POST",
         url:initEndPoint,
         headers:{
-            authorization:"Bearer "+ process.env.PAYSTACK_SECRET,
+            authorization:"Bearer "+ config.paystackSecret,
             "content-type":"Application/json",
             "cache-control":"no-cache"
         },
@@ -22,7 +22,7 @@ const _ = require("lodash")
             return axios(initializeOptions)
         }
         exports.verify = (ref) =>{
-            const url = `${process.env.PAYSTACK_BASE_URL}verify/${encodeURIComponent(ref)}`
+            const url = `${config.paystackBaseUrl}verify/${encodeURIComponent(ref)}`
             const verifyOptions = {...initializeOptions,method:"GET",url}
             return axios(verifyOptions)
         }

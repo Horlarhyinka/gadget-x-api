@@ -1,4 +1,4 @@
-require("dotenv").config()
+const config = require("../config/config")
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -49,7 +49,7 @@ this.password = await bcrypt.hash(this.password,salt)
 })
 
 userSchema.methods.genToken = async (payload) =>{
-    return jwt.sign({payload},process.env.SECRET,{ expiresIn: "2d" })
+    return jwt.sign({payload},config.secret,{ expiresIn: "2d" })
 }
 userSchema.methods.validateInfo = async(req,res) =>{
     const validate = validateUser(req.body)
