@@ -26,8 +26,9 @@ function checkServer(time){
   }, time)
   
 }
-
+if(config.env == 'production'){
 checkServer(1000*60*14)
+}
 
 app.get('/check', (req, res)=>{
   return res.send('OK')
