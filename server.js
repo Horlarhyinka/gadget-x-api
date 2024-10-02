@@ -22,7 +22,7 @@ function checkServer(time){
     }catch(err){
       console.log(err)
     }
-    
+
   }, time)
   
 }
